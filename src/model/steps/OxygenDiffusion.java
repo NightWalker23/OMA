@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class OxygenDiffusion {
+public abstract class OxygenDiffusion {
 	private enum Direction {
 		DOWN, LEFT, RIGHT, UP, NONE;
 	}

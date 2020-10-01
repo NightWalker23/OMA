@@ -16,6 +16,7 @@ public class Controller implements Initializable {
 	public Button startButton;
 	public Canvas canvas;
 	GraphicsContext gc;
+	Model model;
 
 
 	@Override
@@ -23,14 +24,17 @@ public class Controller implements Initializable {
 		gc = canvas.getGraphicsContext2D();
 		gc.setFill(Color.WHITE);
 		gc.fillRect(0, 0, canvas.getHeight(), canvas.getWidth());
+
+		model = new Model();
+		model.createAndInitializeGrid(6, 4, 0.6);
 	}
 
 
 	public void start(ActionEvent actionEvent) {
-		Model model = new Model();
-		model.createAndInitializeGrid(10, 50, 0.1);
+//		Model model = new Model();
+//		model.createAndInitializeGrid(10, 11, 0.6);
 		try {
-			model.startSimulation((byte) 4, 0.5, 10, 0.7, 0.1, 0.2, 10, 4, 8, 1, 1);
+			model.startSimulation(3, 0.5, 10, 0.7, 0.1, 0.2, 10, 4, 1, 1, 1);
 		} catch (ExceptionOxygenBottom e) {
 			showErrorMessage(e.getMessage());
 		} catch (Exception e){

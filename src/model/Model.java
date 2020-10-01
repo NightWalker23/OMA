@@ -2,6 +2,7 @@ package model;
 
 import model.exceptions.ExceptionOxygenBottom;
 import model.steps.OxygenDiffusion;
+import model.steps.Transition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,11 +53,11 @@ public class Model {
 
 //		gridOxygen[1][0].setActive(true);
 //		gridOxygen[2][1].setActive(true);
-//		gridOxygen[2][2].setActive(true);
+		gridOxygen[2][2].setActive(true);
 //		gridOxygen[2][3].setActive(true);
 //		listOfActiveOxygenCells.add(gridOxygen[1][0]);
 //		listOfActiveOxygenCells.add(gridOxygen[2][1]);
-//		listOfActiveOxygenCells.add(gridOxygen[2][2]);
+		listOfActiveOxygenCells.add(gridOxygen[2][2]);
 //		listOfActiveOxygenCells.add(gridOxygen[2][3]);
 
 		//add all oxygen cells from gridOxygen array to listOfAllOxygenCells by reference
@@ -100,12 +101,13 @@ public class Model {
 	//just for test
 	//remove at the end
 	private void printGrids() {
-//		for (int i = 0; i < height; i++) {
-//			for (int j = 0; j < width; j++) {
-//				System.out.print(gridMetalCell[i][j].getState() + " ");
-//			}
-//			System.out.println();
-//		}
+		System.out.println("__________________________________________________________________________________________");
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				System.out.print(gridMetalCell[i][j].getState() + "\t");
+			}
+			System.out.println();
+		}
 //		System.out.println();
 //		for (int i = 0; i < height; i++) {
 //			for (int j = 0; j < width; j++) {
@@ -120,7 +122,7 @@ public class Model {
 		System.out.println();
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width - 1; j++) {
-				System.out.print((gridOxygen[i][j].isActive() ? 1 : 0) + " ");
+				System.out.print((gridOxygen[i][j].isActive() ? 1 : 0) + "\t");
 			}
 			System.out.println();
 		}
@@ -134,17 +136,17 @@ public class Model {
 	}
 
 
-	public void startSimulation(byte minNeighboursSquare, double probabilityPT, int factorR,
+	public void startSimulation(int minNeighboursSquare, double probabilityPT, int factorR,
 								double probabilityP0, double probabilityP2, double probabilityP,
 								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps) throws Exception {
 		if (isGridInitialized()) {
 			for (int j = 0; j < steps; j++) {
 				for (int i = 0; i < iteratorS1; i++) {
-					System.out.println("Oxygen Diffusion #" + i);
+//					System.out.println("Oxygen Diffusion #" + i);
 					oxygenDiffusion(gridOxygen, probabilityP0, probabilityP2, probabilityP);
 				}
 
-				transition(gridMetalCell, gridOxygen);
+				transition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR);
 
 				for (int i = 0; i < iteratorS2; i++) {
 					absorption(gridMetalCell, gridOxygen);
@@ -153,14 +155,15 @@ public class Model {
 		}
 	}
 
-
+	/**
+	 * @return true if arrays gridMetalCell and gridOxygen has been initialized, false otherwise
+	 */
 	private boolean isGridInitialized() {
-		/*
-		TODO:
-		crate checking algorithm if grid was initialized
-		 */
+		if (gridMetalCell != null && gridOxygen != null) {
+			return true;
+		}
 
-		return true;
+		return false;
 	}
 
 
@@ -169,13 +172,13 @@ public class Model {
 	 *
 	 * @param gridOxygen - two dimensional array of oxygen cells
 	 */
-	private void oxygenDiffusion(OxygenCell gridOxygen[][], double probabilityP0, double probabilityP2, double probabilityP) throws ExceptionOxygenBottom {
-		if (! ((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))){
+	private void oxygenDiffusion(OxygenCell gridOxygen[][], double probabilityP0,
+								 double probabilityP2, double probabilityP) throws ExceptionOxygenBottom {
+		if (!((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))) {
 			throw new ExceptionOxygenBottom("Probability P0 has to be greater than probability P and probability P has to be greater than probability P2");
 		}
 		OxygenDiffusion.startDiffusion(gridOxygen, listOfAllOxygenCells, listOfActiveOxygenCells, probabilityP0, probabilityP2, probabilityP, width - 1, height);
 
-		System.out.println();
 		printGrids();
 	}
 
@@ -183,11 +186,18 @@ public class Model {
 	/**
 	 * Third step of the algorithm
 	 *
-	 * @param gridMetalCell - two dimensional array of metal cells
-	 * @param gridOxygen    - two dimensional array of oxygen cells
+	 * @param gridMetalCell       - two dimensional array of metal cells
+	 * @param gridOxygen          - two dimensional array of oxygen cells
+	 * @param minNeighboursSquare - minimum number of cells in Moore neighbourhood required for cell in State.AO to change into State.A in some special conditions
+	 * @param probabilityPT       - probability for cell in State.AO to change into State.A in some special conditions
+	 * @param factorR             - factor used to calculate probability for cell in State.AO to change into State.A and to transmit oxygen in some special conditions
 	 */
-	private void transition(MetalCell gridMetalCell[][], OxygenCell gridOxygen[][]) {
-
+	private void transition(MetalCell gridMetalCell[][], OxygenCell gridOxygen[][],
+							int minNeighboursSquare, double probabilityPT, int factorR) {
+		Transition.startTransition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR,
+				listOfAllMetalCells, listOfMetalCellsI, listOfMetalCellsA, listOfMetalCellsAO,
+				listOfAllOxygenCells, listOfActiveOxygenCells, height, width);
+		printGrids();
 	}
 
 

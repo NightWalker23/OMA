@@ -1,6 +1,6 @@
 package model;
 
-public class MetalCell {
+public class MetalCell implements Cloneable{
 	private State state;
 	private boolean border;
 	private int x, y;
@@ -35,4 +35,18 @@ public class MetalCell {
 	public int getY() {
 		return y;
 	}
+
+	public int getReverseX() {
+		return -x;
+	}
+
+	public int getReverseY() {
+		return -y;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
 }
