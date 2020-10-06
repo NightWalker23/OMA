@@ -5,14 +5,13 @@ import model.OxygenCell;
 import model.State;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Transition {
 
 	public static void startTransition(MetalCell[][] gridMetalCell, OxygenCell[][] gridOxygen, int minNeighboursSquare,
-									   double probabilityPT, int factorR,
+									   double probabilityPT, double factorR,
 									   List<MetalCell> listOfAllMetalCells, List<MetalCell> listOfMetalCellsI,
 									   List<MetalCell> listOfMetalCellsA, List<MetalCell> listOfMetalCellsAO,
 									   List<OxygenCell> listOfAllOxygenCells, List<OxygenCell> listOfActiveOxygenCells,
@@ -31,9 +30,12 @@ public abstract class Transition {
 			for (int j = 0; j < width; j++) {
 				currentMetalCell = gridMetalCell[i][j];
 				if (currentMetalCell.getState().equals(State.A)) {
-					transitionVariantB(i, j, tmpListOfMetalCellsA, tmpListOfMetalCellsAO, listOfActiveOxygenCells, gridOxygen);
+					transitionStateA(i, j, tmpListOfMetalCellsA, tmpListOfMetalCellsAO, listOfActiveOxygenCells,
+							gridOxygen);
 				} else if (currentMetalCell.getState().equals(State.AO)) {
-
+					transitionStateAO(i, j, tmpListOfMetalCellsA, tmpListOfMetalCellsAO, listOfAllOxygenCells,
+							listOfActiveOxygenCells, gridOxygen, gridMetalCell, minNeighboursSquare, probabilityPT,
+							factorR, height, width);
 				}
 			}
 		}
@@ -41,6 +43,7 @@ public abstract class Transition {
 		copyFromTmpListToListsAndGrid(listOfAllMetalCells, listOfMetalCellsI, listOfMetalCellsA, listOfMetalCellsAO,
 				tmpListOfAllMetalCells, tmpListOfMetalCellsI, tmpListOfMetalCellsA, tmpListOfMetalCellsAO, gridMetalCell);
 	}
+
 
 	private static void copyFromListToTmpLists(List<MetalCell> listOfAllMetalCells,
 											   List<MetalCell> tmpListOfAllMetalCells, List<MetalCell> tmpListOfMetalCellsI,
@@ -183,8 +186,8 @@ public abstract class Transition {
 	}
 
 
-	private static void transitionVariantB(int x, int y, List<MetalCell> tmpListOfMetalCellsA, List<MetalCell> tmpListOfMetalCellsAO,
-										   List<OxygenCell> listOfActiveOxygenCells, OxygenCell[][] gridOxygen) {
+	private static void transitionStateA(int x, int y, List<MetalCell> tmpListOfMetalCellsA, List<MetalCell> tmpListOfMetalCellsAO,
+										 List<OxygenCell> listOfActiveOxygenCells, OxygenCell[][] gridOxygen) {
 		List<OxygenCell> listOfNeighbourOxygen;
 		OxygenCell randomOxygenCell;
 		MetalCell tmpMetalCell = null;
@@ -211,29 +214,237 @@ public abstract class Transition {
 		}
 	}
 
-//	private static void transitionVariantB(List<MetalCell> listOfMetalCellsA, List<MetalCell> listOfMetalCellsAO,
-//										   List<OxygenCell> listOfActiveOxygenCells, OxygenCell[][] gridOxygen,
-//										   List<MetalCell> tmpListOfMetalCellsA, List<MetalCell> tmpListOfMetalCellsAO) {
-//		listOfMetalCellsA.sort(Comparator.comparing(MetalCell::getReverseX).thenComparing(MetalCell::getY));
-//		Object[] arrayOfActiveMetalCells = listOfMetalCellsA.toArray();
-//
-//		List<OxygenCell> listOfNeighbourOxygen;
-//		OxygenCell randomOxygenCell;
-//
-//		for (int i = 0; i < arrayOfActiveMetalCells.length; i++) {
-//			listOfNeighbourOxygen = createListOfNeighbourOxygenActive(((MetalCell) arrayOfActiveMetalCells[i]).getX(), ((MetalCell) arrayOfActiveMetalCells[i]).getY(), gridOxygen);
-//
-//			if (listOfNeighbourOxygen.size() > 0) {
-//				((MetalCell) arrayOfActiveMetalCells[i]).setState(State.AO);
-//				listOfMetalCellsA.remove((MetalCell) arrayOfActiveMetalCells[i]);
-//				listOfMetalCellsAO.add((MetalCell) arrayOfActiveMetalCells[i]);
-//				randomOxygenCell = listOfNeighbourOxygen.get(ThreadLocalRandom.current().nextInt(0, listOfNeighbourOxygen.size()));
-//
-//				if (randomOxygenCell.getX() != 0) {
-//					randomOxygenCell.setActive(false);
-//					listOfActiveOxygenCells.remove(randomOxygenCell);
-//				}
-//			}
-//		}
-//	}
+
+	private static void transitionStateAO(int x, int y, List<MetalCell> tmpListOfMetalCellsA,
+										  List<MetalCell> tmpListOfMetalCellsAO, List<OxygenCell> listOfAllOxygenCells,
+										  List<OxygenCell> listOfActiveOxygenCells, OxygenCell[][] gridOxygen, MetalCell[][] gridMetalCell,
+										  int minNeighboursSquare, double probabilityPT, double factorR, int height, int width) {
+		int numberOfNeighbourInStateAO = getNumberOfVonNeumannNeighbourInStateAO(x, y, height, width, gridMetalCell);
+
+		//variant C -> stable state, nothing to do
+		if (numberOfNeighbourInStateAO != 4) {
+
+			//variant D -> check if cell can form a square with other cells in Moore neighbour if number of neighbours in State.AO is >= than minNeighboursSquare
+			//do operations with some probability probabilityPT
+			if (getNumberMooreNeighbourMetalCellInStateAO(x, y, height, width, gridMetalCell) >= minNeighboursSquare &&
+					(isLeftUpSquare(x, y, height, width, gridMetalCell) ||
+							isLeftDownSquare(x, y, height, width, gridMetalCell) ||
+							isRightUpSquare(x, y, height, width, gridMetalCell) ||
+							isRightDownSquare(x, y, height, width, gridMetalCell)) &&
+					ThreadLocalRandom.current().nextDouble(0, 1) < probabilityPT) {
+				transitCellFromStateAOToStateAAndReleaseOxygen(x, y, tmpListOfMetalCellsA, tmpListOfMetalCellsAO, listOfActiveOxygenCells, gridOxygen);
+			} else if (ThreadLocalRandom.current().nextDouble(0, 1) < Math.pow(probabilityPT, (1.0 / factorR))) { //variant E -> every other case
+				transitCellFromStateAOToStateAAndReleaseOxygen(x, y, tmpListOfMetalCellsA, tmpListOfMetalCellsAO, listOfActiveOxygenCells, gridOxygen);
+			}
+		}
+	}
+
+
+	private static int getNumberOfVonNeumannNeighbourInStateAO(int x, int y, int height, int width, MetalCell[][] gridMetalCell) {
+		int numberOfNeighbourInStateAO = 0;
+
+		//up
+		if (x > 0) {
+			if (gridMetalCell[x - 1][y].getState().equals(State.AO)) numberOfNeighbourInStateAO++;
+		}
+
+		//down
+		if (x < height - 1) {
+			if (gridMetalCell[x + 1][y].getState().equals(State.AO)) numberOfNeighbourInStateAO++;
+		}
+
+		//left
+		if (y > 0) {
+			if (gridMetalCell[x][y - 1].getState().equals(State.AO)) numberOfNeighbourInStateAO++;
+		}
+
+		//right
+		if (y < width - 1) {
+			if (gridMetalCell[x][y + 1].getState().equals(State.AO)) numberOfNeighbourInStateAO++;
+		}
+
+		return numberOfNeighbourInStateAO;
+	}
+
+
+	private static int getNumberMooreNeighbourMetalCellInStateAO(int x, int y, int height, int width, MetalCell[][] gridMetalCell) {
+		List<MetalCell> tmpListOfMooreNeighbour = new ArrayList<>();
+
+		//up
+		if (x > 0) {
+			if (gridMetalCell[x - 1][y].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y]);
+		}
+
+		//up left
+		if (x > 0 && y > 0) {
+			if (gridMetalCell[x - 1][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y - 1]);
+		}
+
+		//up right
+		if (x > 0 && y < width - 1) {
+			if (gridMetalCell[x - 1][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y + 1]);
+		}
+
+		//down
+		if (x < height - 1) {
+			if (gridMetalCell[x + 1][y].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y]);
+		}
+
+		//down left
+		if (x < height - 1 && y > 0) {
+			if (gridMetalCell[x + 1][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y - 1]);
+		}
+
+		//down right
+		if (x < height - 1 && y < width - 1) {
+			if (gridMetalCell[x + 1][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y + 1]);
+		}
+
+		//left
+		if (y > 0) {
+			if (gridMetalCell[x][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x][y - 1]);
+		}
+
+		//right
+		if (y < width - 1) {
+			if (gridMetalCell[x][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x][y + 1]);
+		}
+
+		return tmpListOfMooreNeighbour.size();
+	}
+
+
+	private static boolean isLeftUpSquare(int x, int y, int height, int width, MetalCell[][] gridMetalCell) {
+		List<MetalCell> tmpListOfMooreNeighbour = new ArrayList<>();
+
+		//up
+		if (x > 0) {
+			if (gridMetalCell[x - 1][y].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y]);
+		}
+
+		//up left
+		if (x > 0 && y > 0) {
+			if (gridMetalCell[x - 1][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y - 1]);
+		}
+
+		//left
+		if (y > 0) {
+			if (gridMetalCell[x][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x][y - 1]);
+		}
+
+		return tmpListOfMooreNeighbour.size() == 3;
+	}
+
+
+	private static boolean isLeftDownSquare(int x, int y, int height, int width, MetalCell[][] gridMetalCell) {
+		List<MetalCell> tmpListOfMooreNeighbour = new ArrayList<>();
+
+		//down
+		if (x < height - 1) {
+			if (gridMetalCell[x + 1][y].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y]);
+		}
+
+		//down left
+		if (x < height - 1 && y > 0) {
+			if (gridMetalCell[x + 1][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y - 1]);
+		}
+
+		//left
+		if (y > 0) {
+			if (gridMetalCell[x][y - 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x][y - 1]);
+		}
+
+		return tmpListOfMooreNeighbour.size() == 3;
+	}
+
+
+	private static boolean isRightUpSquare(int x, int y, int height, int width, MetalCell[][] gridMetalCell) {
+		List<MetalCell> tmpListOfMooreNeighbour = new ArrayList<>();
+
+		//up
+		if (x > 0) {
+			if (gridMetalCell[x - 1][y].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y]);
+		}
+
+		//up right
+		if (x > 0 && y < width - 1) {
+			if (gridMetalCell[x - 1][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x - 1][y + 1]);
+		}
+
+		//right
+		if (y < width - 1) {
+			if (gridMetalCell[x][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x][y + 1]);
+		}
+
+		return tmpListOfMooreNeighbour.size() == 3;
+	}
+
+
+	private static boolean isRightDownSquare(int x, int y, int height, int width, MetalCell[][] gridMetalCell) {
+		List<MetalCell> tmpListOfMooreNeighbour = new ArrayList<>();
+
+		//down
+		if (x < height - 1) {
+			if (gridMetalCell[x + 1][y].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y]);
+		}
+
+		//down right
+		if (x < height - 1 && y < width - 1) {
+			if (gridMetalCell[x + 1][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x + 1][y + 1]);
+		}
+
+		//right
+		if (y < width - 1) {
+			if (gridMetalCell[x][y + 1].getState().equals(State.AO))
+				tmpListOfMooreNeighbour.add(gridMetalCell[x][y + 1]);
+		}
+
+		return tmpListOfMooreNeighbour.size() == 3;
+	}
+
+
+	private static void transitCellFromStateAOToStateAAndReleaseOxygen(int x, int y, List<MetalCell> tmpListOfMetalCellsA,
+																	   List<MetalCell> tmpListOfMetalCellsAO,
+																	   List<OxygenCell> listOfActiveOxygenCells,
+																	   OxygenCell[][] gridOxygen) {
+		List<OxygenCell> listOfNeighbourOxygenInactive = createListOfNeighbourOxygenInactive(x, y, gridOxygen);
+
+		if (listOfNeighbourOxygenInactive.size() > 0) {
+			MetalCell tmpMetalCell = null;
+			OxygenCell tmpOxygenCell = listOfNeighbourOxygenInactive.get(ThreadLocalRandom.current().nextInt(0, listOfNeighbourOxygenInactive.size()));
+
+			for (MetalCell el : tmpListOfMetalCellsAO) {
+				if (el.getX() == x && el.getY() == y) {
+					tmpMetalCell = el;
+					break;
+				}
+			}
+
+			tmpMetalCell.setState(State.A);
+			tmpListOfMetalCellsAO.remove(tmpMetalCell);
+			tmpListOfMetalCellsA.add(tmpMetalCell);
+			tmpOxygenCell.setActive(true);
+			listOfActiveOxygenCells.add(tmpOxygenCell);
+		}
+	}
+
 }

@@ -136,7 +136,7 @@ public class Model {
 	}
 
 
-	public void startSimulation(int minNeighboursSquare, double probabilityPT, int factorR,
+	public void startSimulation(int minNeighboursSquare, double probabilityPT, double factorR,
 								double probabilityP0, double probabilityP2, double probabilityP,
 								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps) throws Exception {
 		if (isGridInitialized()) {
@@ -179,7 +179,7 @@ public class Model {
 		}
 		OxygenDiffusion.startDiffusion(gridOxygen, listOfAllOxygenCells, listOfActiveOxygenCells, probabilityP0, probabilityP2, probabilityP, width - 1, height);
 
-		printGrids();
+//		printGrids();
 	}
 
 
@@ -193,7 +193,7 @@ public class Model {
 	 * @param factorR             - factor used to calculate probability for cell in State.AO to change into State.A and to transmit oxygen in some special conditions
 	 */
 	private void transition(MetalCell gridMetalCell[][], OxygenCell gridOxygen[][],
-							int minNeighboursSquare, double probabilityPT, int factorR) {
+							int minNeighboursSquare, double probabilityPT, double factorR) {
 		Transition.startTransition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR,
 				listOfAllMetalCells, listOfMetalCellsI, listOfMetalCellsA, listOfMetalCellsAO,
 				listOfAllOxygenCells, listOfActiveOxygenCells, height, width);

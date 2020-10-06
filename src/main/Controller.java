@@ -26,7 +26,7 @@ public class Controller implements Initializable {
 		gc.fillRect(0, 0, canvas.getHeight(), canvas.getWidth());
 
 		model = new Model();
-		model.createAndInitializeGrid(6, 4, 0.6);
+		model.createAndInitializeGrid(20, 30, 0.5);
 	}
 
 
@@ -34,7 +34,7 @@ public class Controller implements Initializable {
 //		Model model = new Model();
 //		model.createAndInitializeGrid(10, 11, 0.6);
 		try {
-			model.startSimulation(3, 0.5, 10, 0.7, 0.1, 0.2, 10, 4, 1, 1, 1);
+			model.startSimulation(5, 0.5, 1.1, 0.7, 0.1, 0.2, 10, 4, 1, 1, 1);
 		} catch (ExceptionOxygenBottom e) {
 			showErrorMessage(e.getMessage());
 		} catch (Exception e){
