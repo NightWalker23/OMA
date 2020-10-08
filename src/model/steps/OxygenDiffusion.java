@@ -1,7 +1,9 @@
 package model.steps;
 
+import model.MetalCell;
 import model.OxygenCell;
 import model.exceptions.ExceptionOxygenBottom;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -13,9 +15,10 @@ public abstract class OxygenDiffusion {
 	}
 
 
-	public static void startDiffusion(OxygenCell gridOxygen[][], List<OxygenCell> listOfAllOxygenCells,
-									  List<OxygenCell> listOfActiveOxygenCells, double probabilityP0,
-									  double probabilityP2, double probabilityP, int width, int height) throws ExceptionOxygenBottom {
+	public static void startDiffusion(OxygenCell gridOxygen[][], MetalCell gridMetalCell[][],
+									  List<OxygenCell> listOfAllOxygenCells, List<OxygenCell> listOfActiveOxygenCells,
+									  double probabilityP0, double probabilityP2, double probabilityP,
+									  int width, int height) throws ExceptionOxygenBottom {
 		Direction direction;
 		List<Direction> listOfAvailableDirections;
 
@@ -28,7 +31,8 @@ public abstract class OxygenDiffusion {
 
 		for (int i = 0; i < arrayOfActiveOxygenCells.length; i++) {
 			listOfAvailableDirections = createListOfAvailableDirections(gridOxygen, (OxygenCell) arrayOfActiveOxygenCells[i], width, height);
-			direction = settleDirectionOfDiffusion(probabilityP0, probabilityP2, probabilityP, listOfAvailableDirections);
+			direction = settleDirectionOfDiffusion(probabilityP0, probabilityP2, probabilityP, listOfAvailableDirections,
+					gridMetalCell, ((OxygenCell) arrayOfActiveOxygenCells[i]).getX(), ((OxygenCell) arrayOfActiveOxygenCells[i]).getY());
 			moveOxygen(gridOxygen, ((OxygenCell) arrayOfActiveOxygenCells[i]), listOfActiveOxygenCells, direction);
 		}
 	}
@@ -99,8 +103,40 @@ public abstract class OxygenDiffusion {
 
 
 	private static Direction settleDirectionOfDiffusion(double probabilityP0, double probabilityP2, double probabilityP,
-														List<Direction> listOfAvailableDirections) {
+														List<Direction> listOfAvailableDirections, MetalCell[][] gridMetalCell,
+														int x, int y) {
 		double probability = ThreadLocalRandom.current().nextDouble(0, 1);
+		double mainFactor = 100.0, probabilityL, probabilityR;
+
+		probabilityL = probabilityR = probabilityP + probabilityP0;
+		probabilityP2 += probabilityP + probabilityP0;
+
+		//TODO: nie wiem jak to ma dzialac
+		if (listOfAvailableDirections.contains(Direction.DOWN)) {
+			if (gridMetalCell[x][y].isBorder() && gridMetalCell[x][y + 1].isBorder()) {
+				probabilityP0 *= mainFactor;
+			}
+		}
+
+		if (listOfAvailableDirections.contains(Direction.LEFT)) {
+			if (gridMetalCell[x - 1][y].isBorder() && gridMetalCell[x][y].isBorder()) {
+				probabilityL *= mainFactor;
+			}
+		}
+
+		if (listOfAvailableDirections.contains(Direction.RIGHT)) {
+			if (gridMetalCell[x - 1][y + 1].isBorder() && gridMetalCell[x][y + 1].isBorder()) {
+				probabilityR *= mainFactor;
+			}
+		}
+
+		if (listOfAvailableDirections.contains(Direction.UP)) {
+			if (gridMetalCell[x - 1][y].isBorder() && gridMetalCell[x - 1][y + 1].isBorder()) {
+				probabilityP2 *= mainFactor;
+			}
+		}
+
+
 
 		if (listOfAvailableDirections.contains(Direction.DOWN) && probability < probabilityP0) {
 			return Direction.DOWN;

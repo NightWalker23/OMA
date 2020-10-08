@@ -1,12 +1,19 @@
 package model;
 
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import model.exceptions.ExceptionGrainBorder;
 import model.exceptions.ExceptionOxygenBottom;
+import model.exceptions.ExceptionOxygenDiffusion;
 import model.steps.OxygenDiffusion;
 import model.steps.Transition;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Model {
@@ -53,11 +60,11 @@ public class Model {
 
 //		gridOxygen[1][0].setActive(true);
 //		gridOxygen[2][1].setActive(true);
-		gridOxygen[2][2].setActive(true);
+//		gridOxygen[2][2].setActive(true);
 //		gridOxygen[2][3].setActive(true);
 //		listOfActiveOxygenCells.add(gridOxygen[1][0]);
 //		listOfActiveOxygenCells.add(gridOxygen[2][1]);
-		listOfActiveOxygenCells.add(gridOxygen[2][2]);
+//		listOfActiveOxygenCells.add(gridOxygen[2][2]);
 //		listOfActiveOxygenCells.add(gridOxygen[2][3]);
 
 		//add all oxygen cells from gridOxygen array to listOfAllOxygenCells by reference
@@ -140,6 +147,8 @@ public class Model {
 								double probabilityP0, double probabilityP2, double probabilityP,
 								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps) throws Exception {
 		if (isGridInitialized()) {
+			loadGrainsBorders();
+
 			for (int j = 0; j < steps; j++) {
 				for (int i = 0; i < iteratorS1; i++) {
 //					System.out.println("Oxygen Diffusion #" + i);
@@ -154,6 +163,56 @@ public class Model {
 			}
 		}
 	}
+
+
+	public void loadGrainsBorders() throws Exception {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("./"));
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Text Files", "*.txt")
+		);
+
+		File selectedFile = fileChooser.showOpenDialog(null);
+		String[] splittedLine;
+		int counterHeight = 0, counterWidth = 0;
+
+		if (selectedFile != null) {
+			try (Scanner scanner = new Scanner(selectedFile)) {
+				while (scanner.hasNext()) {
+					String currentLine = scanner.nextLine().trim();
+					splittedLine = currentLine.split(" ");
+
+					for (String el : splittedLine) {
+						gridMetalCell[counterHeight][counterWidth].setBorder(Integer.parseInt(el.trim()) == 1);
+						counterWidth++;
+					}
+					counterHeight++;
+					if (counterHeight != height)
+						counterWidth = 0;
+				}
+
+				if (counterHeight != height || counterWidth != width) {
+					clearGrainBorders();
+					throw new ExceptionGrainBorder("File with grain borders do not fit with grid!");
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (ArrayIndexOutOfBoundsException e) {
+				clearGrainBorders();
+				throw new ExceptionGrainBorder("File with grain borders do not fit with grid!");
+			}
+		}
+	}
+
+
+	private void clearGrainBorders() {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				gridMetalCell[i][j].setBorder(false);
+			}
+		}
+	}
+
 
 	/**
 	 * @return true if arrays gridMetalCell and gridOxygen has been initialized, false otherwise
@@ -173,11 +232,18 @@ public class Model {
 	 * @param gridOxygen - two dimensional array of oxygen cells
 	 */
 	private void oxygenDiffusion(OxygenCell gridOxygen[][], double probabilityP0,
-								 double probabilityP2, double probabilityP) throws ExceptionOxygenBottom {
+								 double probabilityP2, double probabilityP) throws Exception {
+		double threshold = 0.0001;
+
 		if (!((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))) {
-			throw new ExceptionOxygenBottom("Probability P0 has to be greater than probability P and probability P has to be greater than probability P2");
+			throw new ExceptionOxygenDiffusion("Probability P0 has to be greater than probability P and probability P has to be greater than probability P2");
 		}
-		OxygenDiffusion.startDiffusion(gridOxygen, listOfAllOxygenCells, listOfActiveOxygenCells, probabilityP0, probabilityP2, probabilityP, width - 1, height);
+
+		if (Math.abs((probabilityP0 + probabilityP + probabilityP2) - 1.0) > threshold) {
+			throw new ExceptionOxygenDiffusion("Sum of probabilities p0, p and p2 has to be equal 1.0!");
+		}
+
+		OxygenDiffusion.startDiffusion(gridOxygen, gridMetalCell, listOfAllOxygenCells, listOfActiveOxygenCells, probabilityP0, probabilityP2, probabilityP, width - 1, height);
 
 //		printGrids();
 	}
