@@ -113,25 +113,25 @@ public abstract class OxygenDiffusion {
 
 		//TODO: nie wiem jak to ma dzialac
 		if (listOfAvailableDirections.contains(Direction.DOWN)) {
-			if (gridMetalCell[x][y].isBorder() && gridMetalCell[x][y + 1].isBorder()) {
+			if (gridMetalCell[x][y].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
 				probabilityP0 *= mainFactor;
 			}
 		}
 
 		if (listOfAvailableDirections.contains(Direction.LEFT)) {
-			if (gridMetalCell[x - 1][y].isBorder() && gridMetalCell[x][y].isBorder()) {
+			if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x][y].isBorder()) {
 				probabilityL *= mainFactor;
 			}
 		}
 
 		if (listOfAvailableDirections.contains(Direction.RIGHT)) {
-			if (gridMetalCell[x - 1][y + 1].isBorder() && gridMetalCell[x][y + 1].isBorder()) {
+			if (gridMetalCell[x - 1][y + 1].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
 				probabilityR *= mainFactor;
 			}
 		}
 
 		if (listOfAvailableDirections.contains(Direction.UP)) {
-			if (gridMetalCell[x - 1][y].isBorder() && gridMetalCell[x - 1][y + 1].isBorder()) {
+			if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x - 1][y + 1].isBorder()) {
 				probabilityP2 *= mainFactor;
 			}
 		}
