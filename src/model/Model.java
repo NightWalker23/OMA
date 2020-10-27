@@ -122,30 +122,61 @@ public class Model {
 		int xAO = 1, yAO = 1;
 		MetalCell tmpMetalCell = gridMetalCell[xAO][yAO];
 
-		tmpMetalCell.setState(State.AO);
-		listOfMetalCellsAO.add(tmpMetalCell);
-		listOfMetalCellsA.remove(tmpMetalCell);
-		listOfMetalCellsI.remove(tmpMetalCell);
-
-		tmpMetalCell = gridMetalCell[xAO+1][yAO];
-		tmpMetalCell.setState(State.AO);
-		listOfMetalCellsAO.add(tmpMetalCell);
-		listOfMetalCellsA.remove(tmpMetalCell);
-		listOfMetalCellsI.remove(tmpMetalCell);
-
-		tmpMetalCell = gridMetalCell[xAO][yAO+1];
-		tmpMetalCell.setState(State.AO);
-		listOfMetalCellsAO.add(tmpMetalCell);
-		listOfMetalCellsA.remove(tmpMetalCell);
-		listOfMetalCellsI.remove(tmpMetalCell);
-
-		tmpMetalCell = gridMetalCell[xAO+1][yAO+1];
-		tmpMetalCell.setState(State.AO);
-		listOfMetalCellsAO.add(tmpMetalCell);
-		listOfMetalCellsA.remove(tmpMetalCell);
-		listOfMetalCellsI.remove(tmpMetalCell);
+//		tmpMetalCell.setState(State.AO);
+//		listOfMetalCellsAO.add(tmpMetalCell);
+//		listOfMetalCellsA.remove(tmpMetalCell);
+//		listOfMetalCellsI.remove(tmpMetalCell);
+//
+//		tmpMetalCell = gridMetalCell[xAO+1][yAO];
+//		tmpMetalCell.setState(State.AO);
+//		listOfMetalCellsAO.add(tmpMetalCell);
+//		listOfMetalCellsA.remove(tmpMetalCell);
+//		listOfMetalCellsI.remove(tmpMetalCell);
+//
+//		tmpMetalCell = gridMetalCell[xAO][yAO+1];
+//		tmpMetalCell.setState(State.AO);
+//		listOfMetalCellsAO.add(tmpMetalCell);
+//		listOfMetalCellsA.remove(tmpMetalCell);
+//		listOfMetalCellsI.remove(tmpMetalCell);
+//
+//		tmpMetalCell = gridMetalCell[xAO+1][yAO+1];
+//		tmpMetalCell.setState(State.AO);
+//		listOfMetalCellsAO.add(tmpMetalCell);
+//		listOfMetalCellsA.remove(tmpMetalCell);
+//		listOfMetalCellsI.remove(tmpMetalCell);
 
 		tmpMetalCell = gridMetalCell[5][3];
+		tmpMetalCell.setState(State.AO);
+		listOfMetalCellsAO.add(tmpMetalCell);
+		listOfMetalCellsA.remove(tmpMetalCell);
+		listOfMetalCellsI.remove(tmpMetalCell);
+
+
+		tmpMetalCell = gridMetalCell[2][0];
+		tmpMetalCell.setState(State.AO);
+		listOfMetalCellsAO.add(tmpMetalCell);
+		listOfMetalCellsA.remove(tmpMetalCell);
+		listOfMetalCellsI.remove(tmpMetalCell);
+
+		tmpMetalCell = gridMetalCell[3][0];
+		tmpMetalCell.setState(State.AO);
+		listOfMetalCellsAO.add(tmpMetalCell);
+		listOfMetalCellsA.remove(tmpMetalCell);
+		listOfMetalCellsI.remove(tmpMetalCell);
+
+//		tmpMetalCell = gridMetalCell[3][1];
+//		tmpMetalCell.setState(State.AO);
+//		listOfMetalCellsAO.add(tmpMetalCell);
+//		listOfMetalCellsA.remove(tmpMetalCell);
+//		listOfMetalCellsI.remove(tmpMetalCell);
+
+		tmpMetalCell = gridMetalCell[3][2];
+		tmpMetalCell.setState(State.AO);
+		listOfMetalCellsAO.add(tmpMetalCell);
+		listOfMetalCellsA.remove(tmpMetalCell);
+		listOfMetalCellsI.remove(tmpMetalCell);
+
+		tmpMetalCell = gridMetalCell[2][2];
 		tmpMetalCell.setState(State.AO);
 		listOfMetalCellsAO.add(tmpMetalCell);
 		listOfMetalCellsA.remove(tmpMetalCell);
@@ -319,6 +350,7 @@ public class Model {
 
 
 	/**
+	 * Fourth step of the algorithm
 	 *
 	 * @param gridMetalCell - two dimensional array of metal cells
 	 * @param gridOxygen    - two dimensional array of oxygen cells
