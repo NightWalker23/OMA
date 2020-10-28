@@ -29,16 +29,16 @@ public class Controller implements Initializable {
 		gc.fillRect(0, 0, canvas.getHeight(), canvas.getWidth());
 
 		model = new Model();
-		model.createAndInitializeGrid(6, 7, 0.1);
+		model.createAndInitializeGrid(6, 7, 0.5);
 	}
 
 
 	public void start(ActionEvent actionEvent) {
 //		Model model = new Model();
 //		model.createAndInitializeGrid(10, 11, 0.6);
-		double p0 = 0.2, p = 0.7, p2 = 0.11;
+		double p0 = 0.7, p = 0.2, p2 = 0.1;
 		try {
-			model.startSimulation(5, 0.5, 1.1, p0, p2, p, 2, 1, 1, 1, 1);
+			model.startSimulation(5, 0.5, 1.1, p0, p2, p, 3, 3, 1, 1, 1);
 		} catch (ExceptionOxygenBottom | ExceptionGrainBorder | ExceptionOxygenDiffusion e) {
 			showErrorMessage(e.getMessage());
 		} catch (Exception e) {

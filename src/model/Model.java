@@ -95,18 +95,18 @@ public class Model {
 		int numberOfCellsToTransform = (int) (concentration * (this.width * this.height));
 
 		//FOR TESTS
-		numberOfCellsToTransform = 0;
-		MetalCell tmpCell_tmp;
+//		numberOfCellsToTransform = 0;
+//		MetalCell tmpCell_tmp;
+//
+//		tmpCell_tmp = gridMetalCell[0][4];
+//		tmpCell_tmp.setState(State.A);
+//		listOfMetalCellsI.remove(tmpCell_tmp);
+//		listOfMetalCellsA.add(tmpCell_tmp);
 
-		tmpCell_tmp = gridMetalCell[3][4];
-		tmpCell_tmp.setState(State.A);
-		listOfMetalCellsI.remove(tmpCell_tmp);
-		listOfMetalCellsA.add(tmpCell_tmp);
-
-		tmpCell_tmp = gridMetalCell[4][1];
-		tmpCell_tmp.setState(State.A);
-		listOfMetalCellsI.remove(tmpCell_tmp);
-		listOfMetalCellsA.add(tmpCell_tmp);
+//		tmpCell_tmp = gridMetalCell[4][1];
+//		tmpCell_tmp.setState(State.A);
+//		listOfMetalCellsI.remove(tmpCell_tmp);
+//		listOfMetalCellsA.add(tmpCell_tmp);
 		// END FOR TESTS
 
 		for (int i = 0; i < numberOfCellsToTransform; i++) {
@@ -145,11 +145,11 @@ public class Model {
 //		listOfMetalCellsA.remove(tmpMetalCell);
 //		listOfMetalCellsI.remove(tmpMetalCell);
 
-		tmpMetalCell = gridMetalCell[5][3];
-		tmpMetalCell.setState(State.AO);
-		listOfMetalCellsAO.add(tmpMetalCell);
-		listOfMetalCellsA.remove(tmpMetalCell);
-		listOfMetalCellsI.remove(tmpMetalCell);
+//		tmpMetalCell = gridMetalCell[5][3];
+//		tmpMetalCell.setState(State.AO);
+//		listOfMetalCellsAO.add(tmpMetalCell);
+//		listOfMetalCellsA.remove(tmpMetalCell);
+//		listOfMetalCellsI.remove(tmpMetalCell);
 
 
 		tmpMetalCell = gridMetalCell[2][0];
@@ -158,7 +158,7 @@ public class Model {
 		listOfMetalCellsA.remove(tmpMetalCell);
 		listOfMetalCellsI.remove(tmpMetalCell);
 
-		tmpMetalCell = gridMetalCell[3][0];
+		tmpMetalCell = gridMetalCell[1][0];
 		tmpMetalCell.setState(State.AO);
 		listOfMetalCellsAO.add(tmpMetalCell);
 		listOfMetalCellsA.remove(tmpMetalCell);
@@ -197,24 +197,24 @@ public class Model {
 			}
 			System.out.println();
 		}
-		System.out.println();
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				System.out.print(gridMetalCell[i][j].getX() + ":" + gridMetalCell[i][j].getY() + " ");
-			}
-			System.out.println();
-		}
-
-
-//		System.out.println();
-//		System.out.println();
 //		System.out.println();
 //		for (int i = 0; i < height; i++) {
-//			for (int j = 0; j < width - 1; j++) {
-//				System.out.print((gridOxygen[i][j].isActive() ? 1 : 0) + "\t");
+//			for (int j = 0; j < width; j++) {
+//				System.out.print(gridMetalCell[i][j].getX() + ":" + gridMetalCell[i][j].getY() + " ");
 //			}
 //			System.out.println();
 //		}
+
+
+//		System.out.println();
+//		System.out.println();
+		System.out.println();
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width - 1; j++) {
+				System.out.print((gridOxygen[i][j].isActive() ? 1 : 0) + "\t");
+			}
+			System.out.println();
+		}
 //		System.out.println();
 //		for (int i = 0; i < height; i++) {
 //			for (int j = 0; j < width - 1; j++) {
@@ -234,10 +234,10 @@ public class Model {
 			for (int j = 0; j < steps; j++) {
 				for (int i = 0; i < iteratorS1; i++) {
 //					System.out.println("Oxygen Diffusion #" + i);
-//					oxygenDiffusion(gridOxygen, probabilityP0, probabilityP2, probabilityP);
+					oxygenDiffusion(gridOxygen, probabilityP0, probabilityP2, probabilityP);
 				}
 
-//				transition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR);
+				transition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR);
 
 				for (int i = 0; i < iteratorS2; i++) {
 					absorption(gridMetalCell, gridOxygen, radiusN, sizeGn);
@@ -345,7 +345,7 @@ public class Model {
 		Transition.startTransition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR,
 				listOfAllMetalCells, listOfMetalCellsI, listOfMetalCellsA, listOfMetalCellsAO,
 				listOfAllOxygenCells, listOfActiveOxygenCells, height, width);
-		printGrids();
+//		printGrids();
 	}
 
 
@@ -359,8 +359,7 @@ public class Model {
 	 */
 	private void absorption(MetalCell gridMetalCell[][], OxygenCell gridOxygen[][], int radiusN, int sizeGn) {
 		Absorption.startAbsorption(gridMetalCell, gridOxygen, radiusN, sizeGn, height, width,
-				listOfAllMetalCells, listOfMetalCellsA, listOfMetalCellsAO, listOfMetalCellsI,
-				listOfAllOxygenCells, listOfActiveOxygenCells);
+				listOfAllMetalCells, listOfMetalCellsA, listOfMetalCellsAO, listOfMetalCellsI);
 
 		printGrids();
 	}
