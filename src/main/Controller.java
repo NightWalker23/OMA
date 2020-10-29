@@ -61,9 +61,9 @@ public class Controller implements Initializable {
 		fieldGridY.setText("11");
 		fieldConcentration.setText("0.2");
 
-		fieldProbabilityP0.setText("0.7");
-		fieldProbabilityP.setText("0.1");
-		fieldProbabilityP2.setText("0.1");
+		fieldProbabilityP0.setText("0.25");
+		fieldProbabilityP.setText("0.25");
+		fieldProbabilityP2.setText("0.25");
 		fieldIteratorS1.setText("1");
 
 		fieldMinSquare.setText("3");
@@ -118,7 +118,7 @@ public class Controller implements Initializable {
 
 
 	private void showMetalGridOnCanvas() {
-		int cellSize = 1;
+		int cellSize = 3;
 
 		if (model != null) {
 			MetalCell holdGrid[][] = model.getGridMetalCell();
@@ -143,7 +143,7 @@ public class Controller implements Initializable {
 
 
 	private void showOxygenGridOnCanvas() {
-		int cellSize = 1;
+		int cellSize = 3;
 
 		if (model != null) {
 			OxygenCell holdGrid[][] = model.getGridOxygen();
@@ -166,7 +166,7 @@ public class Controller implements Initializable {
 
 
 	private void showBordersGridOnCanvas() {
-		int cellSize = 1;
+		int cellSize = 3;
 
 		if (model != null) {
 			MetalCell holdGrid[][] = model.getGridMetalCell();
