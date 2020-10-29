@@ -2,17 +2,60 @@
 
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
 
-<GridPane alignment="center" hgap="10" minHeight="500.0" minWidth="500.0" prefHeight="500.0" prefWidth="500.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Controller">
+<GridPane alignment="center" hgap="10" minHeight="700.0" minWidth="700.0" prefHeight="700.0" prefWidth="700.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Controller">
    <children>
-      <AnchorPane minHeight="500.0" minWidth="500.0" prefHeight="500.0" prefWidth="500.0">
+      <AnchorPane minHeight="700.0" minWidth="700.0" prefHeight="700.0" prefWidth="700.0">
          <children>
-            <Button fx:id="startButton" layoutX="434.0" layoutY="14.0" mnemonicParsing="false" onAction="#start" text="Start" />
-            <Canvas fx:id="canvas" height="200.0" layoutX="14.0" layoutY="14.0" width="200.0" />
+            <ScrollPane layoutX="10.0" layoutY="10.0" prefHeight="450.0" prefWidth="450.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+              <content>
+                <AnchorPane minHeight="1000.0" minWidth="1000.0" prefHeight="1000.0" prefWidth="1000.0">
+                     <children>
+                        <Canvas fx:id="canvas" height="1000.0" width="1000.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+            <TextField fx:id="fieldGridX" layoutX="586.0" layoutY="14.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
+            <TextField fx:id="fieldGridY" layoutX="586.0" layoutY="46.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" />
+            <TextField fx:id="fieldConcentration" layoutX="586.0" layoutY="81.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="80.0" />
+            <Button fx:id="buttonInitializeGrid" layoutX="586.0" layoutY="114.0" mnemonicParsing="false" onAction="#initializeGrid" prefHeight="25.0" prefWidth="100.0" text="Initialize grid" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="114.0" />
+            <Button fx:id="buttonLoadBorders" layoutX="586.0" layoutY="145.0" mnemonicParsing="false" onAction="#loadBorders" prefHeight="25.0" prefWidth="100.0" text="Load borders" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="149.0" />
+            <TextField fx:id="fieldProbabilityP0" layoutX="586.0" layoutY="210.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="210.0" />
+            <TextField fx:id="fieldProbabilityP" layoutX="586.0" layoutY="244.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="245.0" />
+            <TextField fx:id="fieldProbabilityP2" layoutX="586.0" layoutY="279.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="280.0" />
+            <TextField fx:id="fieldIteratorS1" layoutX="586.0" layoutY="315.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="315.0" />
+            <TextField fx:id="fieldMinSquare" layoutX="588.0" layoutY="374.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="370.0" />
+            <TextField fx:id="fieldProbabilityPT" layoutX="586.0" layoutY="403.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="405.0" />
+            <TextField fx:id="fieldFactorR" layoutX="586.0" layoutY="435.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="440.0" />
+            <TextField fx:id="fieldRadius" layoutX="585.0" layoutY="499.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="495.0" />
+            <TextField fx:id="fieldMinSize" layoutX="586.0" layoutY="528.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="530.0" />
+            <TextField fx:id="fieldIteratorS2" layoutX="586.0" layoutY="562.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="565.0" />
+            <TextField fx:id="fieldIterations" layoutX="592.0" layoutY="614.0" prefHeight="25.0" prefWidth="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="620.0" />
+            <Text layoutX="522.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Grid size height" AnchorPane.rightAnchor="122.716796875" AnchorPane.topAnchor="14.0" />
+            <Text layoutX="522.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Grid size width" AnchorPane.rightAnchor="122.716796875" AnchorPane.topAnchor="49.0" />
+            <Text layoutX="503.0" layoutY="98.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Concentration" AnchorPane.rightAnchor="122.0" AnchorPane.topAnchor="84.0" />
+            <Text layoutX="503.0" layoutY="227.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Iterator S1" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="319.05078125" />
+            <Text layoutX="504.0" layoutY="262.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Probability P" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="249.0" />
+            <Text layoutX="500.0" layoutY="297.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Probability P2" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="284.0" />
+            <Text layoutX="504.0" layoutY="227.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Probability P0" AnchorPane.rightAnchor="122.79296875" />
+            <Text layoutX="484.0" layoutY="387.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Neighbour square" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="374.0" />
+            <Text layoutX="503.0" layoutY="422.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Probability PT" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="409.05078125" />
+            <Text layoutX="536.0" layoutY="457.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Factor R" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="444.0" />
+            <Text layoutX="536.0" layoutY="512.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Radius" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="499.0" />
+            <Text layoutX="523.0" layoutY="547.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Min size" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="534.0" />
+            <Text layoutX="526.0" layoutY="582.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Iterator S2" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="569.0" />
+            <Text layoutX="521.0" layoutY="627.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of iterations" AnchorPane.rightAnchor="123.79296875" AnchorPane.topAnchor="624.0" />
+            <Button fx:id="startButton" layoutX="636.0" layoutY="647.0" mnemonicParsing="false" onAction="#start" prefHeight="25.0" prefWidth="100.0" text="Start" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="655.0" />
+            <CheckBox fx:id="checkBoxMetalOxygen" layoutX="480.0" layoutY="659.0" mnemonicParsing="false" text="Metal/Oxygen" AnchorPane.rightAnchor="123.0" AnchorPane.topAnchor="659.0" />
          </children></AnchorPane>
    </children>
    <columnConstraints>

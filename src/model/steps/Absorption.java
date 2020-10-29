@@ -10,9 +10,8 @@ import java.util.List;
 
 public class Absorption {
 
-	public static void startAbsorption(MetalCell[][] gridMetalCell, OxygenCell[][] gridOxygen, int radiusN, int sizeGn, int heightMC, int widthMC,
-									   List<MetalCell> listOfAllMetalCells, List<MetalCell> listOfMetalCellsA,
-									   List<MetalCell> listOfMetalCellsAO, List<MetalCell> listOfMetalCellsI) {
+	public static void startAbsorption(MetalCell[][] gridMetalCell, int radiusN, int sizeGn, int heightMC, int widthMC,
+									   List<MetalCell> listOfMetalCellsA, List<MetalCell> listOfMetalCellsI) {
 		Object[] arrayOfMetalCellsA = listOfMetalCellsA.toArray();
 		List<MetalCell> listOfNeighbours = new ArrayList<>();
 		List<List<MetalCell>> listOfIslands = new ArrayList<>();
@@ -94,9 +93,6 @@ public class Absorption {
 			yStop = widthMC - 1;
 		}
 
-		//TODO:
-		// Tu ewentualnie można dodać przeliczenie odległości między dwoma punktami - obecnie analizowanym, a środkiem całego otoczenia
-		// jeżeli odległość większa niż promień to nie dodajemy - w efekcie analizowane sąsiedztwo zamiast być kwadratem będzie kołem
 		for (int i = xStart; i <= xStop; i++) {
 			for (int j = yStart; j <= yStop; j++) {
 				tmpListOfNeighbours.add(gridMetalCell[i][j]);
