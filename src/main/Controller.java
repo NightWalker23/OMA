@@ -62,7 +62,7 @@ public class Controller implements Initializable {
 		fieldConcentration.setText("0.2");
 
 		fieldProbabilityP0.setText("0.7");
-		fieldProbabilityP.setText("0.2");
+		fieldProbabilityP.setText("0.1");
 		fieldProbabilityP2.setText("0.1");
 		fieldIteratorS1.setText("1");
 
@@ -84,7 +84,7 @@ public class Controller implements Initializable {
 		int minNeighbourSquare, radiusN, sizeGn, iteratorS1, iteratorS2, steps;
 
 		p0 = readDoubleFromTextField(fieldProbabilityP0);
-		p = readDoubleFromTextField(fieldProbabilityP);
+		p = readDoubleFromTextField(fieldProbabilityP) * 2;
 		p2 = readDoubleFromTextField(fieldProbabilityP2);
 		iteratorS1 = readIntFromTextField(fieldIteratorS1);
 
@@ -111,12 +111,14 @@ public class Controller implements Initializable {
 		else
 			showOxygenGridOnCanvas();
 
+//		showBordersGridOnCanvas();
+
 		buttonLoadBorders.setDisable(true);
 	}
 
 
 	private void showMetalGridOnCanvas() {
-		int cellSize = 3;
+		int cellSize = 1;
 
 		if (model != null) {
 			MetalCell holdGrid[][] = model.getGridMetalCell();
@@ -125,7 +127,7 @@ public class Controller implements Initializable {
 				for (int j = 0; j < model.getHeight(); j++) {
 					MetalCell holdCell = holdGrid[j][i];
 					if (holdCell.getState().equals(State.I)) {
-						gc.setFill(Color.GRAY);
+						gc.setFill(Color.LIGHTGRAY);
 						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
 					} else if (holdCell.getState().equals(State.A)) {
 						gc.setFill(Color.RED);
@@ -141,24 +143,46 @@ public class Controller implements Initializable {
 
 
 	private void showOxygenGridOnCanvas() {
-		int cellSize = 3;
+		int cellSize = 1;
 
 		if (model != null) {
 			OxygenCell holdGrid[][] = model.getGridOxygen();
 			cleanCanvas();
-			for (int i = 0; i < model.getHeight(); i++) {
+			for (int i = 0; i < model.getWidth()-1; i++) {
 				for (int j = 0; j < model.getHeight(); j++) {
 					OxygenCell holdCell = holdGrid[j][i];
 					if (holdCell.isActive()) {
 						gc.setFill(Color.BLACK);
 						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
 					} else {
-						gc.setFill(Color.GRAY);
+						gc.setFill(Color.LIGHTGRAY);
 						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
 					}
 				}
 			}
 
+		}
+	}
+
+
+	private void showBordersGridOnCanvas() {
+		int cellSize = 1;
+
+		if (model != null) {
+			MetalCell holdGrid[][] = model.getGridMetalCell();
+			cleanCanvas();
+			for (int i = 0; i < model.getWidth(); i++) {
+				for (int j = 0; j < model.getHeight(); j++) {
+					MetalCell holdCell = holdGrid[j][i];
+					if (holdCell.isBorder()) {
+						gc.setFill(Color.BLACK);
+						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+					} else {
+						gc.setFill(Color.LIGHTGRAY);
+						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+					}
+				}
+			}
 		}
 	}
 

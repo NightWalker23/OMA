@@ -194,7 +194,7 @@ public class Model {
 //		listOfMetalCellsI.remove(tmpMetalCell);
 		//END FOR TESTS
 
-		printGrids();
+//		printGrids();
 	}
 
 
@@ -277,9 +277,9 @@ public class Model {
 								 double probabilityP2, double probabilityP) throws Exception {
 		double threshold = 0.0001;
 
-		if (!((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))) {
-			throw new ExceptionOxygenDiffusion("Probability P0 has to be greater than probability P and probability P has to be greater than probability P2");
-		}
+//		if (!((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))) {
+//			throw new ExceptionOxygenDiffusion("Probability P0 has to be greater than probability P and probability P has to be greater than probability P2");
+//		}
 
 		if (Math.abs((probabilityP0 + probabilityP + probabilityP2) - 1.0) > threshold) {
 			throw new ExceptionOxygenDiffusion("Sum of probabilities p0, p and p2 has to be equal 1.0!");

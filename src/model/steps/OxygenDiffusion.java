@@ -32,7 +32,7 @@ public abstract class OxygenDiffusion {
 		for (int i = 0; i < arrayOfActiveOxygenCells.length; i++) {
 			listOfAvailableDirections = createListOfAvailableDirections(gridOxygen, (OxygenCell) arrayOfActiveOxygenCells[i], width, height);
 			direction = settleDirectionOfDiffusion(probabilityP0, probabilityP2, probabilityP, listOfAvailableDirections,
-					gridMetalCell, ((OxygenCell) arrayOfActiveOxygenCells[i]).getX(), ((OxygenCell) arrayOfActiveOxygenCells[i]).getY());
+					gridMetalCell, ((OxygenCell) arrayOfActiveOxygenCells[i]).getX(), ((OxygenCell) arrayOfActiveOxygenCells[i]).getY(), width, height);
 			moveOxygen(gridOxygen, ((OxygenCell) arrayOfActiveOxygenCells[i]), listOfActiveOxygenCells, direction);
 		}
 	}
@@ -40,36 +40,42 @@ public abstract class OxygenDiffusion {
 
 	private static void moveOxygen(OxygenCell[][] gridOxygen, OxygenCell el, List<OxygenCell> listOfActiveOxygenCells, Direction direction) {
 		if (!direction.equals(Direction.NONE)) {
-			switch (direction) {
-				case UP:
-					gridOxygen[el.getX() - 1][el.getY()].setActive(true);
-					el.setActive(false);
-					listOfActiveOxygenCells.remove(el);
-					listOfActiveOxygenCells.add(gridOxygen[el.getX() - 1][el.getY()]);
-					break;
 
-				case LEFT:
-					gridOxygen[el.getX()][el.getY() - 1].setActive(true);
-					el.setActive(false);
-					listOfActiveOxygenCells.remove(el);
-					listOfActiveOxygenCells.add(gridOxygen[el.getX()][el.getY() - 1]);
-					break;
-
-				case RIGHT:
-					gridOxygen[el.getX()][el.getY() + 1].setActive(true);
-					el.setActive(false);
-					listOfActiveOxygenCells.remove(el);
-					listOfActiveOxygenCells.add(gridOxygen[el.getX()][el.getY() + 1]);
-					break;
-
-				case DOWN:
-					gridOxygen[el.getX() + 1][el.getY()].setActive(true);
-					if (el.getX() != 0) {
+			if (el.getX() == 0 && direction.equals(Direction.DOWN)) {
+				gridOxygen[el.getX() + 1][el.getY()].setActive(true);
+				listOfActiveOxygenCells.add(gridOxygen[el.getX() + 1][el.getY()]);
+			} else if (el.getX() != 0) {
+				switch (direction) {
+					case UP:
+						gridOxygen[el.getX() - 1][el.getY()].setActive(true);
 						el.setActive(false);
 						listOfActiveOxygenCells.remove(el);
-					}
-					listOfActiveOxygenCells.add(gridOxygen[el.getX() + 1][el.getY()]);
-					break;
+						listOfActiveOxygenCells.add(gridOxygen[el.getX() - 1][el.getY()]);
+						break;
+
+					case LEFT:
+						gridOxygen[el.getX()][el.getY() - 1].setActive(true);
+						el.setActive(false);
+						listOfActiveOxygenCells.remove(el);
+						listOfActiveOxygenCells.add(gridOxygen[el.getX()][el.getY() - 1]);
+						break;
+
+					case RIGHT:
+						gridOxygen[el.getX()][el.getY() + 1].setActive(true);
+						el.setActive(false);
+						listOfActiveOxygenCells.remove(el);
+						listOfActiveOxygenCells.add(gridOxygen[el.getX()][el.getY() + 1]);
+						break;
+
+					case DOWN:
+						gridOxygen[el.getX() + 1][el.getY()].setActive(true);
+						if (el.getX() != 0) {
+							el.setActive(false);
+							listOfActiveOxygenCells.remove(el);
+						}
+						listOfActiveOxygenCells.add(gridOxygen[el.getX() + 1][el.getY()]);
+						break;
+				}
 			}
 		}
 	}
@@ -82,20 +88,27 @@ public abstract class OxygenDiffusion {
 		x = cell.getX();
 		y = cell.getY();
 
-		if (x > 0) {
-			if (!gridOxygen[x - 1][y].isActive()) listOfAvailableDirections.add(Direction.UP);
-		}
+		if (x == 0) {
+			listOfAvailableDirections.add(Direction.UP);
+			listOfAvailableDirections.add(Direction.LEFT);
+			listOfAvailableDirections.add(Direction.RIGHT);
+			listOfAvailableDirections.add(Direction.DOWN);
+		} else {
+			if (x > 0) {
+				if (!gridOxygen[x - 1][y].isActive()) listOfAvailableDirections.add(Direction.UP);
+			}
 
-		if (x < height - 1) {
-			if (!gridOxygen[x + 1][y].isActive()) listOfAvailableDirections.add(Direction.DOWN);
-		}
+			if (x < height - 1) {
+				if (!gridOxygen[x + 1][y].isActive()) listOfAvailableDirections.add(Direction.DOWN);
+			}
 
-		if (y > 0) {
-			if (!gridOxygen[x][y - 1].isActive()) listOfAvailableDirections.add(Direction.LEFT);
-		}
+			if (y > 0) {
+				if (!gridOxygen[x][y - 1].isActive()) listOfAvailableDirections.add(Direction.LEFT);
+			}
 
-		if (y < width - 1) {
-			if (!gridOxygen[x][y + 1].isActive()) listOfAvailableDirections.add(Direction.RIGHT);
+			if (y < width - 1) {
+				if (!gridOxygen[x][y + 1].isActive()) listOfAvailableDirections.add(Direction.RIGHT);
+			}
 		}
 
 		return listOfAvailableDirections;
@@ -104,63 +117,108 @@ public abstract class OxygenDiffusion {
 
 	private static Direction settleDirectionOfDiffusion(double probabilityP0, double probabilityP2, double probabilityP,
 														List<Direction> listOfAvailableDirections, MetalCell[][] gridMetalCell,
-														int x, int y) {
-		double probability = ThreadLocalRandom.current().nextDouble(0, 1);
+														int x, int y, int width, int height) {
+		double probability = 0.0;// = ThreadLocalRandom.current().nextDouble(0, 1);
 		double mainFactor = 100.0, probabilityL, probabilityR;
 
-		probabilityL = probabilityR = probabilityP + probabilityP0;
-		probabilityP2 += probabilityP + probabilityP0;
+		if (listOfAvailableDirections.size() > 0) {
 
-		//TODO: nie wiem jak to ma dzialac
-		if (listOfAvailableDirections.contains(Direction.DOWN)) {
-			if (gridMetalCell[x][y].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
-				probabilityP0 *= mainFactor;
-			}
-		}
+			probabilityP /= 2.0;
+			probabilityL = probabilityR = probabilityP;// + probabilityP0;
+//			probabilityP2 += probabilityP + probabilityP0;
 
-		if (listOfAvailableDirections.contains(Direction.LEFT)) {
-			if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x][y].isBorder()) {
-				probabilityL *= mainFactor;
-			}
-		}
-
-		if (listOfAvailableDirections.contains(Direction.RIGHT)) {
-			if (gridMetalCell[x - 1][y + 1].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
-				probabilityR *= mainFactor;
-			}
-		}
-
-		if (listOfAvailableDirections.contains(Direction.UP)) {
-			if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x - 1][y + 1].isBorder()) {
-				probabilityP2 *= mainFactor;
-			}
-		}
-
-
-
-		if (listOfAvailableDirections.contains(Direction.DOWN) && probability < probabilityP0) {
-			return Direction.DOWN;
-		}
-
-		if ((listOfAvailableDirections.contains(Direction.LEFT) || listOfAvailableDirections.contains(Direction.RIGHT)) && (probability < (probabilityP0 + probabilityP))) {
-			if (listOfAvailableDirections.contains(Direction.LEFT) && listOfAvailableDirections.contains(Direction.RIGHT)) {
-				if (ThreadLocalRandom.current().nextInt(0, 2) == 0) {
-					return Direction.LEFT;
-				} else {
-					return Direction.RIGHT;
+			//TODO: nie wiem jak to ma dzialac
+			if (listOfAvailableDirections.contains(Direction.DOWN)) {
+				if (gridMetalCell[x][y].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
+					probabilityP0 *= mainFactor;
 				}
 			}
 
-			if (listOfAvailableDirections.contains(Direction.LEFT)) {
-				return Direction.LEFT;
+			if (x > 0) {
+				if (listOfAvailableDirections.contains(Direction.LEFT)) {
+					if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x][y].isBorder()) {
+						probabilityL *= mainFactor;
+					}
+				}
 			}
 
-			return Direction.RIGHT;
+			if (y < width - 1 && x > 0) {
+				if (listOfAvailableDirections.contains(Direction.RIGHT)) {
+					if (gridMetalCell[x - 1][y + 1].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
+						probabilityR *= mainFactor;
+					}
+				}
+			}
+
+//			if (x > 0 && y < width - 1) {
+//				if (listOfAvailableDirections.contains(Direction.UP)) {
+//					if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x - 1][y + 1].isBorder()) {
+//						probabilityP2 *= mainFactor;
+//					}
+//				}
+//			}
+
+			double sumOfProbabilities = 0.0;
+			for (Direction el : listOfAvailableDirections) {
+				if (el.equals(Direction.DOWN)) sumOfProbabilities += probabilityP0;
+				else if (el.equals(Direction.LEFT)) sumOfProbabilities += probabilityL;
+				else if (el.equals(Direction.RIGHT)) sumOfProbabilities += probabilityR;
+				else if (el.equals(Direction.UP)) sumOfProbabilities += probabilityP2;
+			}
+
+			try {
+				probability = ThreadLocalRandom.current().nextDouble(0, sumOfProbabilities);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			double minP = 0.0, maxP = 0.0;
+
+			for (Direction el : listOfAvailableDirections) {
+				if (y == 45){
+					System.out.println();
+				}
+				minP = maxP;
+				if (el.equals(Direction.DOWN)) {
+					maxP += probabilityP0;
+				} else if (el.equals(Direction.LEFT)) {
+					maxP += probabilityL;
+				} else if (el.equals(Direction.RIGHT)) {
+					maxP += probabilityR;
+				} else if (el.equals(Direction.UP)) {
+					maxP += probabilityP2;
+				}
+
+				if (probability >= minP && probability < maxP) {
+					return el;
+				}
+			}
 		}
 
-		if (listOfAvailableDirections.contains(Direction.UP)) {
-			return Direction.UP;
-		}
+
+//		if (listOfAvailableDirections.contains(Direction.DOWN) && probability < probabilityP0) {
+//			return Direction.DOWN;
+//		}
+//
+//		if ((listOfAvailableDirections.contains(Direction.LEFT) || listOfAvailableDirections.contains(Direction.RIGHT)) && (probability < (probabilityP0 + probabilityP))) {
+//			if (listOfAvailableDirections.contains(Direction.LEFT) && listOfAvailableDirections.contains(Direction.RIGHT)) {
+//				if (ThreadLocalRandom.current().nextInt(0, 2) == 0) {
+//					return Direction.LEFT;
+//				} else {
+//					return Direction.RIGHT;
+//				}
+//			}
+//
+//			if (listOfAvailableDirections.contains(Direction.LEFT)) {
+//				return Direction.LEFT;
+//			}
+//
+//			return Direction.RIGHT;
+//		}
+//
+//		if (listOfAvailableDirections.contains(Direction.UP)) {
+//			return Direction.UP;
+//		}
 
 		//niezależnie od wylosowanego prawdopodobieństwa - jak się nic nie trafiło to wybierz jakikolwiek wolny kierunek
 //		if (	listOfAvailableDirections.contains(Direction.DOWN) ||
