@@ -4,6 +4,8 @@ import model.exceptions.ExceptionOxygenDiffusion;
 import model.steps.Absorption;
 import model.steps.OxygenDiffusion;
 import model.steps.Transition;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,15 +72,6 @@ public class Model {
 			}
 		}
 
-//		gridOxygen[1][0].setActive(true);
-//		gridOxygen[2][1].setActive(true);
-//		gridOxygen[2][2].setActive(true);
-//		gridOxygen[2][3].setActive(true);
-//		listOfActiveOxygenCells.add(gridOxygen[1][0]);
-//		listOfActiveOxygenCells.add(gridOxygen[2][1]);
-//		listOfActiveOxygenCells.add(gridOxygen[2][2]);
-//		listOfActiveOxygenCells.add(gridOxygen[2][3]);
-
 		//add all oxygen cells from gridOxygen array to listOfAllOxygenCells by reference
 		for (OxygenCell[] array : gridOxygen) {
 			listOfAllOxygenCells.addAll(Arrays.asList(array));
@@ -105,21 +98,6 @@ public class Model {
 		//change random cells from grid to State.A according to the concentration factor
 		int numberOfCellsToTransform = (int) (concentration * (this.width * this.height));
 
-		//FOR TESTS
-//		numberOfCellsToTransform = 0;
-//		MetalCell tmpCell_tmp;
-//
-//		tmpCell_tmp = gridMetalCell[0][4];
-//		tmpCell_tmp.setState(State.A);
-//		listOfMetalCellsI.remove(tmpCell_tmp);
-//		listOfMetalCellsA.add(tmpCell_tmp);
-
-//		tmpCell_tmp = gridMetalCell[4][1];
-//		tmpCell_tmp.setState(State.A);
-//		listOfMetalCellsI.remove(tmpCell_tmp);
-//		listOfMetalCellsA.add(tmpCell_tmp);
-		// END FOR TESTS
-
 		for (int i = 0; i < numberOfCellsToTransform; i++) {
 			MetalCell tmpCell;
 			tmpCell = listOfMetalCellsI.get(ThreadLocalRandom.current().nextInt(0, listOfMetalCellsI.size()));
@@ -127,123 +105,17 @@ public class Model {
 			listOfMetalCellsI.remove(tmpCell);
 			listOfMetalCellsA.add(tmpCell);
 		}
-
-
-		//FOR TESTS
-//		int xAO = 1, yAO = 1;
-//		MetalCell tmpMetalCell = gridMetalCell[xAO][yAO];
-
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-//
-//		tmpMetalCell = gridMetalCell[xAO+1][yAO];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-//
-//		tmpMetalCell = gridMetalCell[xAO][yAO+1];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-//
-//		tmpMetalCell = gridMetalCell[xAO+1][yAO+1];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-
-//		tmpMetalCell = gridMetalCell[5][3];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-
-
-//		tmpMetalCell = gridMetalCell[2][0];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-//
-//		tmpMetalCell = gridMetalCell[1][0];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-
-//		tmpMetalCell = gridMetalCell[3][1];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-
-//		tmpMetalCell = gridMetalCell[3][2];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-//
-//		tmpMetalCell = gridMetalCell[2][2];
-//		tmpMetalCell.setState(State.AO);
-//		listOfMetalCellsAO.add(tmpMetalCell);
-//		listOfMetalCellsA.remove(tmpMetalCell);
-//		listOfMetalCellsI.remove(tmpMetalCell);
-		//END FOR TESTS
-
-//		printGrids();
-	}
-
-
-	//just for test
-	//remove at the end
-	private void printGrids() {
-		System.out.println("__________________________________________________________________________________________");
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				System.out.print(gridMetalCell[i][j].getState() + "\t");
-			}
-			System.out.println();
-		}
-//		System.out.println();
-//		for (int i = 0; i < height; i++) {
-//			for (int j = 0; j < width; j++) {
-//				System.out.print(gridMetalCell[i][j].getX() + ":" + gridMetalCell[i][j].getY() + " ");
-//			}
-//			System.out.println();
-//		}
-
-
-//		System.out.println();
-//		System.out.println();
-		System.out.println();
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width - 1; j++) {
-				System.out.print((gridOxygen[i][j].isActive() ? 1 : 0) + "\t");
-			}
-			System.out.println();
-		}
-//		System.out.println();
-//		for (int i = 0; i < height; i++) {
-//			for (int j = 0; j < width - 1; j++) {
-//				System.out.print(gridOxygen[i][j].getX() + ":" + gridOxygen[i][j].getY() + " ");
-//			}
-//			System.out.println();
-//		}
 	}
 
 
 	public void startSimulation(int minNeighboursSquare, double probabilityPT, double factorR,
 								double probabilityP0, double probabilityP2, double probabilityP,
-								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps) throws Exception {
+								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps,
+								Point point, double probabilityFactor) throws Exception {
 		if (isGridInitialized()) {
-
 			for (int j = 0; j < steps; j++) {
 				for (int i = 0; i < iteratorS1; i++) {
-					oxygenDiffusion(gridOxygen, probabilityP0, probabilityP2, probabilityP);
+					oxygenDiffusion(gridOxygen, probabilityP0, probabilityP2, probabilityP, probabilityFactor);
 				}
 
 				transition(gridMetalCell, gridOxygen, minNeighboursSquare, probabilityPT, factorR);
@@ -251,6 +123,7 @@ public class Model {
 				for (int i = 0; i < iteratorS2; i++) {
 					absorption(gridMetalCell, gridOxygen, radiusN, sizeGn);
 				}
+				point.x++;
 			}
 		}
 	}
@@ -274,7 +147,7 @@ public class Model {
 	 * @param gridOxygen - two dimensional array of oxygen cells
 	 */
 	private void oxygenDiffusion(OxygenCell gridOxygen[][], double probabilityP0,
-								 double probabilityP2, double probabilityP) throws Exception {
+								 double probabilityP2, double probabilityP, double probabilityFactor) throws Exception {
 		double threshold = 0.0001;
 
 //		if (!((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))) {
@@ -285,7 +158,8 @@ public class Model {
 			throw new ExceptionOxygenDiffusion("Sum of probabilities p0, p and p2 has to be equal 1.0!");
 		}
 
-		OxygenDiffusion.startDiffusion(gridOxygen, gridMetalCell, listOfAllOxygenCells, listOfActiveOxygenCells, probabilityP0, probabilityP2, probabilityP, width - 1, height);
+		OxygenDiffusion.startDiffusion(gridOxygen, gridMetalCell, listOfActiveOxygenCells,
+				probabilityP0, probabilityP2, probabilityP, width - 1, height, probabilityFactor);
 	}
 
 
@@ -316,7 +190,5 @@ public class Model {
 	 */
 	private void absorption(MetalCell gridMetalCell[][], OxygenCell gridOxygen[][], int radiusN, int sizeGn) {
 		Absorption.startAbsorption(gridMetalCell, radiusN, sizeGn, height, width, listOfMetalCellsA, listOfMetalCellsI);
-
-//		printGrids();
 	}
 }

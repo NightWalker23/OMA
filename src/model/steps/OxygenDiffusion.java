@@ -5,7 +5,6 @@ import model.OxygenCell;
 import model.exceptions.ExceptionOxygenBottom;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -15,10 +14,9 @@ public abstract class OxygenDiffusion {
 	}
 
 
-	public static void startDiffusion(OxygenCell gridOxygen[][], MetalCell gridMetalCell[][],
-									  List<OxygenCell> listOfAllOxygenCells, List<OxygenCell> listOfActiveOxygenCells,
+	public static void startDiffusion(OxygenCell gridOxygen[][], MetalCell gridMetalCell[][], List<OxygenCell> listOfActiveOxygenCells,
 									  double probabilityP0, double probabilityP2, double probabilityP,
-									  int width, int height) throws ExceptionOxygenBottom {
+									  int width, int height, double probabilityFactor) throws ExceptionOxygenBottom {
 		Direction direction;
 		List<Direction> listOfAvailableDirections;
 
@@ -26,13 +24,13 @@ public abstract class OxygenDiffusion {
 			throw new ExceptionOxygenBottom("The depth of diffusion exceeded the thickness of the sample.");
 		}
 
-		listOfActiveOxygenCells.sort(Comparator.comparing(OxygenCell::getReverseX).thenComparing(OxygenCell::getY));
 		Object[] arrayOfActiveOxygenCells = listOfActiveOxygenCells.toArray();
 
 		for (int i = 0; i < arrayOfActiveOxygenCells.length; i++) {
 			listOfAvailableDirections = createListOfAvailableDirections(gridOxygen, (OxygenCell) arrayOfActiveOxygenCells[i], width, height);
 			direction = settleDirectionOfDiffusion(probabilityP0, probabilityP2, probabilityP, listOfAvailableDirections,
-					gridMetalCell, ((OxygenCell) arrayOfActiveOxygenCells[i]).getX(), ((OxygenCell) arrayOfActiveOxygenCells[i]).getY(), width, height);
+					gridMetalCell, ((OxygenCell) arrayOfActiveOxygenCells[i]).getX(), ((OxygenCell) arrayOfActiveOxygenCells[i]).getY(),
+					width, height, probabilityFactor);
 			moveOxygen(gridOxygen, ((OxygenCell) arrayOfActiveOxygenCells[i]), listOfActiveOxygenCells, direction);
 		}
 	}
@@ -117,17 +115,16 @@ public abstract class OxygenDiffusion {
 
 	private static Direction settleDirectionOfDiffusion(double probabilityP0, double probabilityP2, double probabilityP,
 														List<Direction> listOfAvailableDirections, MetalCell[][] gridMetalCell,
-														int x, int y, int width, int height) {
+														int x, int y, int width, int height, double probabilityFactor) {
 		double probability = 0.0;// = ThreadLocalRandom.current().nextDouble(0, 1);
-		double mainFactor = 100.0, probabilityL, probabilityR;
+		double mainFactor = probabilityFactor, probabilityL, probabilityR;
 
 		if (listOfAvailableDirections.size() > 0) {
 
 			probabilityP /= 2.0;
 			probabilityL = probabilityR = probabilityP;// + probabilityP0;
-//			probabilityP2 += probabilityP + probabilityP0;
+//			probabilityP2 += probabilityP + probabilityP0;	//do not consider UP
 
-			//TODO: nie wiem jak to ma dzialac
 			if (listOfAvailableDirections.contains(Direction.DOWN)) {
 				if (gridMetalCell[x][y].isBorder() || gridMetalCell[x][y + 1].isBorder()) {
 					probabilityP0 *= mainFactor;
@@ -150,6 +147,7 @@ public abstract class OxygenDiffusion {
 				}
 			}
 
+			//do not consider UP
 //			if (x > 0 && y < width - 1) {
 //				if (listOfAvailableDirections.contains(Direction.UP)) {
 //					if (gridMetalCell[x - 1][y].isBorder() || gridMetalCell[x - 1][y + 1].isBorder()) {
@@ -175,9 +173,6 @@ public abstract class OxygenDiffusion {
 			double minP = 0.0, maxP = 0.0;
 
 			for (Direction el : listOfAvailableDirections) {
-				if (y == 45){
-					System.out.println();
-				}
 				minP = maxP;
 				if (el.equals(Direction.DOWN)) {
 					maxP += probabilityP0;
@@ -194,38 +189,6 @@ public abstract class OxygenDiffusion {
 				}
 			}
 		}
-
-
-//		if (listOfAvailableDirections.contains(Direction.DOWN) && probability < probabilityP0) {
-//			return Direction.DOWN;
-//		}
-//
-//		if ((listOfAvailableDirections.contains(Direction.LEFT) || listOfAvailableDirections.contains(Direction.RIGHT)) && (probability < (probabilityP0 + probabilityP))) {
-//			if (listOfAvailableDirections.contains(Direction.LEFT) && listOfAvailableDirections.contains(Direction.RIGHT)) {
-//				if (ThreadLocalRandom.current().nextInt(0, 2) == 0) {
-//					return Direction.LEFT;
-//				} else {
-//					return Direction.RIGHT;
-//				}
-//			}
-//
-//			if (listOfAvailableDirections.contains(Direction.LEFT)) {
-//				return Direction.LEFT;
-//			}
-//
-//			return Direction.RIGHT;
-//		}
-//
-//		if (listOfAvailableDirections.contains(Direction.UP)) {
-//			return Direction.UP;
-//		}
-
-		//niezależnie od wylosowanego prawdopodobieństwa - jak się nic nie trafiło to wybierz jakikolwiek wolny kierunek
-//		if (	listOfAvailableDirections.contains(Direction.DOWN) ||
-//				listOfAvailableDirections.contains(Direction.LEFT) ||
-//				listOfAvailableDirections.contains(Direction.RIGHT)) {
-//			return (listOfAvailableDirections.get(ThreadLocalRandom.current().nextInt(0, listOfAvailableDirections.size())));
-//		}
 
 		return Direction.NONE;
 	}

@@ -155,7 +155,7 @@ public abstract class Transition {
 		List<OxygenCell> tmpListOfOxygenCells = new ArrayList<>();
 
 		//left up
-		if (y > 0) {
+		if (y > 0 && x > 0) {
 			if (!gridOxygen[x][y - 1].isActive()) {
 				tmpListOfOxygenCells.add(gridOxygen[x][y - 1]);
 			}
@@ -169,7 +169,7 @@ public abstract class Transition {
 		}
 
 		//right up
-		if (y < gridOxygen[0].length - 1) {
+		if (y < gridOxygen[0].length - 1  && x > 0) {
 			if (!gridOxygen[x][y].isActive()) {
 				tmpListOfOxygenCells.add(gridOxygen[x][y]);
 			}

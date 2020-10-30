@@ -4,11 +4,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import model.MetalCell;
 import model.OxygenCell;
@@ -17,7 +17,9 @@ import model.exceptions.ExceptionGrainBorder;
 import model.exceptions.ExceptionOxygenBottom;
 import model.Model;
 import model.exceptions.ExceptionOxygenDiffusion;
+import model.exceptions.ExceptionWithMessage;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -43,19 +45,39 @@ public class Controller implements Initializable {
 	public TextField fieldFactorR;
 	public Button buttonInitializeGrid;
 	public Button buttonLoadBorders;
-	public CheckBox checkBoxMetalOxygen;
+	public Button buttonVisualize;
+	public RadioButton radioMetal;
+	public RadioButton radioOxygen;
+	public RadioButton radioBorders;
+	public TextField fieldBorderDiffusion;
+	public Text textIterations;
+	public Text textDepth;
 	GraphicsContext gc;
 	Model model;
+	int cellSize, depth;
+	Point point;
 
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		cellSize = 1;
+		depth = 0;
+		point = new Point(0, 0);
+
+		ToggleGroup toggleGroup = new ToggleGroup();
+
+		radioMetal.setToggleGroup(toggleGroup);
+		radioOxygen.setToggleGroup(toggleGroup);
+		radioBorders.setToggleGroup(toggleGroup);
+		radioMetal.setSelected(true);
+
 		gc = canvas.getGraphicsContext2D();
 		gc.setFill(Color.WHITE);
 		gc.fillRect(0, 0, canvas.getHeight(), canvas.getWidth());
 
 		buttonLoadBorders.setDisable(true);
 		startButton.setDisable(true);
+		buttonVisualize.setDisable(true);
 
 		fieldGridX.setText("10");
 		fieldGridY.setText("11");
@@ -70,17 +92,21 @@ public class Controller implements Initializable {
 		fieldProbabilityPT.setText("0.2");
 		fieldFactorR.setText("0.1");
 
-		fieldRadius.setText("3");
-		fieldMinSize.setText("2");
+		fieldRadius.setText("2");
+		fieldMinSize.setText("5");
 		fieldIteratorS2.setText("1");
 
 		fieldIterations.setText("1");
-		checkBoxMetalOxygen.setSelected(true);
+		fieldBorderDiffusion.setText("100.0");
+
+		textDepth.setText("0");
+		textIterations.setText("0");
+		point.x = 0;
 	}
 
 
 	public void start(ActionEvent actionEvent) {
-		double p0, p, p2, pT, factorR;
+		double p0, p, p2, pT, factorR, probabilityFactor;
 		int minNeighbourSquare, radiusN, sizeGn, iteratorS1, iteratorS2, steps;
 
 		p0 = readDoubleFromTextField(fieldProbabilityP0);
@@ -97,29 +123,70 @@ public class Controller implements Initializable {
 		iteratorS2 = readIntFromTextField(fieldIteratorS2);
 
 		steps = readIntFromTextField(fieldIterations);
+		probabilityFactor = readDoubleFromTextField(fieldBorderDiffusion);
 
 		try {
-			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps);
-		} catch (ExceptionOxygenBottom | ExceptionGrainBorder | ExceptionOxygenDiffusion e) {
-			showErrorMessage(e.getMessage());
+			if (!checkVarInRange(minNeighbourSquare, 1, 8))
+				throw new ExceptionWithMessage("Neighbour square has to be in range <1; 8>");
+
+			if (!checkVarInRange(pT, 0.0, 1.0))
+				throw new ExceptionWithMessage("Probability pT has to be in range <0.0; 1.0>");
+
+			if (radiusN < 0.0)
+				throw new ExceptionWithMessage("Probability pT has to be in range <0.0; 1.0>");
+
+			if (radiusN < 0.0)
+				throw new ExceptionWithMessage("Probability pT has to be greater than 0.0");
+
+			if (sizeGn < 0)
+				throw new ExceptionWithMessage("Probability pT has to be greater than 0");
+
+			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, point, probabilityFactor);
+			depth = getDepth(model);
+
+			textDepth.setText(String.valueOf(depth));
+			textIterations.setText(String.valueOf(point.x));
+		} catch (ExceptionOxygenBottom | ExceptionGrainBorder | ExceptionOxygenDiffusion | ExceptionWithMessage e) {
+			showMessage(e.getMessage(), Alert.AlertType.ERROR);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		if (checkBoxMetalOxygen.isSelected())
-			showMetalGridOnCanvas();
-		else
-			showOxygenGridOnCanvas();
-
-//		showBordersGridOnCanvas();
-
+		visualizeGrid();
 		buttonLoadBorders.setDisable(true);
 	}
 
 
-	private void showMetalGridOnCanvas() {
-		int cellSize = 3;
+	private int getDepth(Model model) {
+		int tmpDepth = 0;
 
+		MetalCell[][] grid = model.getGridMetalCell();
+
+		for (int i = model.getHeight() - 1; i >= 0; i--) {
+			for (int j = model.getWidth() - 1; j >= 0; j--) {
+				if (grid[i][j].getState().equals(State.AO)) {
+					tmpDepth = i;
+					return tmpDepth;
+				}
+			}
+		}
+
+		return tmpDepth;
+	}
+
+
+	private void visualizeGrid() {
+		cleanCanvas();
+		if (radioMetal.isSelected())
+			showMetalGridOnCanvas();
+		else if (radioOxygen.isSelected())
+			showOxygenGridOnCanvas();
+		else
+			showBordersGridOnCanvas();
+	}
+
+
+	private void showMetalGridOnCanvas() {
 		if (model != null) {
 			MetalCell holdGrid[][] = model.getGridMetalCell();
 			cleanCanvas();
@@ -128,13 +195,13 @@ public class Controller implements Initializable {
 					MetalCell holdCell = holdGrid[j][i];
 					if (holdCell.getState().equals(State.I)) {
 						gc.setFill(Color.LIGHTGRAY);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					} else if (holdCell.getState().equals(State.A)) {
 						gc.setFill(Color.RED);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					} else if (holdCell.getState().equals(State.AO)) {
 						gc.setFill(Color.DARKRED);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					}
 				}
 			}
@@ -143,20 +210,18 @@ public class Controller implements Initializable {
 
 
 	private void showOxygenGridOnCanvas() {
-		int cellSize = 3;
-
 		if (model != null) {
 			OxygenCell holdGrid[][] = model.getGridOxygen();
 			cleanCanvas();
-			for (int i = 0; i < model.getWidth()-1; i++) {
+			for (int i = 0; i < model.getWidth() - 1; i++) {
 				for (int j = 0; j < model.getHeight(); j++) {
 					OxygenCell holdCell = holdGrid[j][i];
 					if (holdCell.isActive()) {
 						gc.setFill(Color.BLACK);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					} else {
 						gc.setFill(Color.LIGHTGRAY);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					}
 				}
 			}
@@ -166,8 +231,6 @@ public class Controller implements Initializable {
 
 
 	private void showBordersGridOnCanvas() {
-		int cellSize = 3;
-
 		if (model != null) {
 			MetalCell holdGrid[][] = model.getGridMetalCell();
 			cleanCanvas();
@@ -176,10 +239,10 @@ public class Controller implements Initializable {
 					MetalCell holdCell = holdGrid[j][i];
 					if (holdCell.isBorder()) {
 						gc.setFill(Color.BLACK);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					} else {
 						gc.setFill(Color.LIGHTGRAY);
-						gc.fillRect(i*cellSize, j*cellSize, cellSize, cellSize);
+						gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
 					}
 				}
 			}
@@ -187,8 +250,8 @@ public class Controller implements Initializable {
 	}
 
 
-	private void showErrorMessage(String message) {
-		Alert alert = new Alert(Alert.AlertType.ERROR);
+	private void showMessage(String message, Alert.AlertType alertType) {
+		Alert alert = new Alert(alertType);
 		alert.setHeaderText(message);
 		alert.showAndWait();
 	}
@@ -213,22 +276,23 @@ public class Controller implements Initializable {
 		minSizeConcentration = 0.0;
 		maxSizeConcentration = 1.0;
 
+		textDepth.setText("0");
+		textIterations.setText("0");
+		point.x = 0;
+
 		if (checkVarInRange(height, minSizeGrid, maxSizeGrid) && checkVarInRange(width, minSizeGrid, maxSizeGrid)) {
 			if (checkVarInRange(concentration, minSizeConcentration, maxSizeConcentration)) {
 				model.createAndInitializeGrid(height, width, concentration);
 				buttonLoadBorders.setDisable(false);
 				startButton.setDisable(false);
-				cleanCanvas();
+				buttonVisualize.setDisable(false);
 
-				if (checkBoxMetalOxygen.isSelected())
-					showMetalGridOnCanvas();
-				else
-					showOxygenGridOnCanvas();
+				visualizeGrid();
 			} else {
-				showErrorMessage("Concentration has to be in range <" + minSizeConcentration + "; " + maxSizeConcentration + ">");
+				showMessage("Concentration has to be in range <" + minSizeConcentration + "; " + maxSizeConcentration + ">", Alert.AlertType.ERROR);
 			}
 		} else {
-			showErrorMessage("Height and width of the grid has to be in range <" + minSizeGrid + "; " + maxSizeGrid + ">");
+			showMessage("Height and width of the grid has to be in range <" + minSizeGrid + "; " + maxSizeGrid + ">", Alert.AlertType.ERROR);
 		}
 	}
 
@@ -274,17 +338,15 @@ public class Controller implements Initializable {
 				try {
 					throw new ExceptionGrainBorder("File with grain borders do not fit with grid!");
 				} catch (ExceptionGrainBorder exceptionGrainBorder) {
-					showErrorMessage(exceptionGrainBorder.getMessage());
+					showMessage(exceptionGrainBorder.getMessage(), Alert.AlertType.ERROR);
 				}
 			} catch (ExceptionGrainBorder exceptionGrainBorder) {
 				outcome = false;
-				showErrorMessage(exceptionGrainBorder.getMessage());
+				showMessage(exceptionGrainBorder.getMessage(), Alert.AlertType.ERROR);
 			}
 
 			if (outcome) {
-				Alert alert = new Alert(Alert.AlertType.INFORMATION);
-				alert.setHeaderText("Grains borders loaded successfully.");
-				alert.showAndWait();
+				showMessage("Grains borders loaded successfully.", Alert.AlertType.INFORMATION);
 			}
 		}
 	}
@@ -323,12 +385,17 @@ public class Controller implements Initializable {
 	}
 
 
-	private boolean checkVarInRange(int varToCheck, int minRange, int maxRange){
+	private boolean checkVarInRange(int varToCheck, int minRange, int maxRange) {
 		return varToCheck >= minRange && varToCheck <= maxRange;
 	}
 
 
-	private boolean checkVarInRange(double varToCheck, double minRange, double maxRange){
+	private boolean checkVarInRange(double varToCheck, double minRange, double maxRange) {
 		return varToCheck >= minRange && varToCheck <= maxRange;
+	}
+
+
+	public void visualize(ActionEvent actionEvent) {
+		visualizeGrid();
 	}
 }

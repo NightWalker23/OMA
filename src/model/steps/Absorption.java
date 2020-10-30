@@ -1,7 +1,6 @@
 package model.steps;
 
 import model.MetalCell;
-import model.OxygenCell;
 import model.State;
 
 import java.util.ArrayList;
