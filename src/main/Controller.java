@@ -1,5 +1,6 @@
 package main;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
@@ -7,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -19,7 +21,9 @@ import model.Model;
 import model.exceptions.ExceptionOxygenDiffusion;
 import model.exceptions.ExceptionWithMessage;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -52,17 +56,18 @@ public class Controller implements Initializable {
 	public TextField fieldBorderDiffusion;
 	public Text textIterations;
 	public Text textDepth;
+	public Button buttonSaveImage;
 	GraphicsContext gc;
 	Model model;
 	int cellSize, depth;
-	Point point;
+	Point counterOfSteps;
 
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		cellSize = 1;
 		depth = 0;
-		point = new Point(0, 0);
+		counterOfSteps = new Point(0, 0);
 
 		ToggleGroup toggleGroup = new ToggleGroup();
 
@@ -101,7 +106,8 @@ public class Controller implements Initializable {
 
 		textDepth.setText("0");
 		textIterations.setText("0");
-		point.x = 0;
+
+		buttonSaveImage.setDisable(true);
 	}
 
 
@@ -141,11 +147,11 @@ public class Controller implements Initializable {
 			if (sizeGn < 0)
 				throw new ExceptionWithMessage("Probability pT has to be greater than 0");
 
-			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, point, probabilityFactor);
+			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, counterOfSteps, probabilityFactor);
 			depth = getDepth(model);
 
 			textDepth.setText(String.valueOf(depth));
-			textIterations.setText(String.valueOf(point.x));
+			textIterations.setText(String.valueOf(counterOfSteps.x));
 		} catch (ExceptionOxygenBottom | ExceptionGrainBorder | ExceptionOxygenDiffusion | ExceptionWithMessage e) {
 			showMessage(e.getMessage(), Alert.AlertType.ERROR);
 		} catch (Exception e) {
@@ -154,6 +160,7 @@ public class Controller implements Initializable {
 
 		visualizeGrid();
 		buttonLoadBorders.setDisable(true);
+		buttonSaveImage.setDisable(false);
 	}
 
 
@@ -278,7 +285,7 @@ public class Controller implements Initializable {
 
 		textDepth.setText("0");
 		textIterations.setText("0");
-		point.x = 0;
+		counterOfSteps.x = 0;
 
 		if (checkVarInRange(height, minSizeGrid, maxSizeGrid) && checkVarInRange(width, minSizeGrid, maxSizeGrid)) {
 			if (checkVarInRange(concentration, minSizeConcentration, maxSizeConcentration)) {
@@ -397,5 +404,26 @@ public class Controller implements Initializable {
 
 	public void visualize(ActionEvent actionEvent) {
 		visualizeGrid();
+	}
+
+
+	public void saveImage(ActionEvent actionEvent) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("./"));
+
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("bmp files (*.bmp)", "*.bmp");
+		fileChooser.getExtensionFilters().add(extFilter);
+
+		File file = fileChooser.showSaveDialog(null);
+
+		if (file != null) {
+			try {
+				WritableImage writableImage = new WritableImage(model.getWidth(), model.getHeight());
+				canvas.snapshot(null, writableImage);
+				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+				ImageIO.write(bufferedImage, "png", file);
+			} catch (Exception ignored) {
+			}
+		}
 	}
 }

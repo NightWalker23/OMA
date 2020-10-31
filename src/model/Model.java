@@ -111,7 +111,7 @@ public class Model {
 	public void startSimulation(int minNeighboursSquare, double probabilityPT, double factorR,
 								double probabilityP0, double probabilityP2, double probabilityP,
 								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps,
-								Point point, double probabilityFactor) throws Exception {
+								Point counterOfSteps, double probabilityFactor) throws Exception {
 		if (isGridInitialized()) {
 			for (int j = 0; j < steps; j++) {
 				for (int i = 0; i < iteratorS1; i++) {
@@ -123,7 +123,7 @@ public class Model {
 				for (int i = 0; i < iteratorS2; i++) {
 					absorption(gridMetalCell, gridOxygen, radiusN, sizeGn);
 				}
-				point.x++;
+				counterOfSteps.x++;
 			}
 		}
 	}
