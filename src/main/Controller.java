@@ -27,6 +27,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
@@ -57,6 +59,7 @@ public class Controller implements Initializable {
 	public Text textIterations;
 	public Text textDepth;
 	public Button buttonSaveImage;
+	public Button buttonLoadBordersBMP;
 	GraphicsContext gc;
 	Model model;
 	int cellSize, depth;
@@ -81,6 +84,7 @@ public class Controller implements Initializable {
 		gc.fillRect(0, 0, canvas.getHeight(), canvas.getWidth());
 
 		buttonLoadBorders.setDisable(true);
+		buttonLoadBordersBMP.setDisable(true);
 		startButton.setDisable(true);
 		buttonVisualize.setDisable(true);
 
@@ -160,6 +164,7 @@ public class Controller implements Initializable {
 
 		visualizeGrid();
 		buttonLoadBorders.setDisable(true);
+		buttonLoadBordersBMP.setDisable(true);
 		buttonSaveImage.setDisable(false);
 	}
 
@@ -291,6 +296,7 @@ public class Controller implements Initializable {
 			if (checkVarInRange(concentration, minSizeConcentration, maxSizeConcentration)) {
 				model.createAndInitializeGrid(height, width, concentration);
 				buttonLoadBorders.setDisable(false);
+				buttonLoadBordersBMP.setDisable(false);
 				startButton.setDisable(false);
 				buttonVisualize.setDisable(false);
 
@@ -425,5 +431,113 @@ public class Controller implements Initializable {
 			} catch (Exception ignored) {
 			}
 		}
+	}
+
+
+	public void loadBordersBMP(ActionEvent actionEvent) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("./"));
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("BMP Files", "*.bmp")
+		);
+
+		int color;
+		int[][] tabOfColors = new int[model.getHeight()][model.getWidth()];
+		boolean outcome = true;
+
+		File selectedFile = fileChooser.showOpenDialog(null);
+		if (selectedFile != null) {
+			try {
+				clearGrainBorders(model.getHeight(), model.getWidth(), model.getGridMetalCell());
+				BufferedImage image = ImageIO.read(selectedFile);
+
+				if (image.getHeight() != model.getHeight() || image.getWidth() != model.getWidth()){
+					throw new ExceptionWithMessage("File with grain borders do not fit with grid!");
+				}
+
+				for (int xPixel = 0; xPixel < image.getHeight(); xPixel++) {
+					for (int yPixel = 0; yPixel < image.getWidth(); yPixel++) {
+						color = image.getRGB(xPixel, yPixel);
+						tabOfColors[xPixel][yPixel] = color;
+					}
+				}
+
+				for (int xPixel = 0; xPixel < image.getHeight(); xPixel++) {
+					for (int yPixel = 0; yPixel < image.getWidth(); yPixel++) {
+						List<Integer> tmpListOfMooreNeighbourColor = getMooreNeighbourMetalCell(xPixel, yPixel,
+								image.getHeight(), image.getWidth(), tabOfColors);
+
+						for (Integer el : tmpListOfMooreNeighbourColor){
+							if (tabOfColors[xPixel][yPixel] != el){
+								model.getGridMetalCell()[xPixel][yPixel].setBorder(true);
+								break;
+							}
+						}
+					}
+				}
+
+			} catch (ExceptionWithMessage e){
+				outcome = false;
+				clearGrainBorders(model.getHeight(), model.getWidth(), model.getGridMetalCell());
+				showMessage(e.getMessage(), Alert.AlertType.ERROR);
+			} catch (Exception ex) {
+				outcome = false;
+				clearGrainBorders(model.getHeight(), model.getWidth(), model.getGridMetalCell());
+				ex.printStackTrace();
+			}
+		} else {
+			outcome = false;
+		}
+
+		if (outcome) {
+			showMessage("Grains borders loaded successfully.", Alert.AlertType.INFORMATION);
+		}
+	}
+
+
+	private List<Integer> getMooreNeighbourMetalCell(int x, int y, int height, int width, int[][] colorGrid) {
+		List<Integer> tmpListOfMooreNeighbour = new ArrayList<>();
+
+		//up
+		if (x > 0) {
+			tmpListOfMooreNeighbour.add(colorGrid[x - 1][y]);
+		}
+
+		//up left
+		if (x > 0 && y > 0) {
+			tmpListOfMooreNeighbour.add(colorGrid[x - 1][y - 1]);
+		}
+
+		//up right
+		if (x > 0 && y < width - 1) {
+			tmpListOfMooreNeighbour.add(colorGrid[x - 1][y + 1]);
+		}
+
+		//down
+		if (x < height - 1) {
+			tmpListOfMooreNeighbour.add(colorGrid[x + 1][y]);
+		}
+
+		//down left
+		if (x < height - 1 && y > 0) {
+			tmpListOfMooreNeighbour.add(colorGrid[x + 1][y - 1]);
+		}
+
+		//down right
+		if (x < height - 1 && y < width - 1) {
+			tmpListOfMooreNeighbour.add(colorGrid[x + 1][y + 1]);
+		}
+
+		//left
+		if (y > 0) {
+			tmpListOfMooreNeighbour.add(colorGrid[x][y - 1]);
+		}
+
+		//right
+		if (y < width - 1) {
+			tmpListOfMooreNeighbour.add(colorGrid[x][y + 1]);
+		}
+
+		return tmpListOfMooreNeighbour;
 	}
 }
