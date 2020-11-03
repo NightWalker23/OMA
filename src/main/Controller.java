@@ -60,9 +60,11 @@ public class Controller implements Initializable {
 	public Text textDepth;
 	public Button buttonSaveImage;
 	public Button buttonLoadBordersBMP;
+	public TextField fieldConcentrationOxygen;
 	GraphicsContext gc;
 	Model model;
 	int cellSize, depth;
+	double oxygenConcentration;
 	Point counterOfSteps;
 
 
@@ -91,6 +93,7 @@ public class Controller implements Initializable {
 		fieldGridX.setText("10");
 		fieldGridY.setText("11");
 		fieldConcentration.setText("0.2");
+		fieldConcentrationOxygen.setText("0.5");
 
 		fieldProbabilityP0.setText("0.25");
 		fieldProbabilityP.setText("0.25");
@@ -119,6 +122,8 @@ public class Controller implements Initializable {
 		double p0, p, p2, pT, factorR, probabilityFactor;
 		int minNeighbourSquare, radiusN, sizeGn, iteratorS1, iteratorS2, steps;
 
+		oxygenConcentration = readDoubleFromTextField(fieldConcentrationOxygen);
+
 		p0 = readDoubleFromTextField(fieldProbabilityP0);
 		p = readDoubleFromTextField(fieldProbabilityP) * 2;
 		p2 = readDoubleFromTextField(fieldProbabilityP2);
@@ -136,6 +141,9 @@ public class Controller implements Initializable {
 		probabilityFactor = readDoubleFromTextField(fieldBorderDiffusion);
 
 		try {
+			if (!checkVarInRange(oxygenConcentration, 0.0, 1.0))
+				throw new ExceptionWithMessage("Oxygen concentration has to be in range <0.0; 1.0>");
+
 			if (!checkVarInRange(minNeighbourSquare, 1, 8))
 				throw new ExceptionWithMessage("Neighbour square has to be in range <1; 8>");
 
@@ -151,7 +159,7 @@ public class Controller implements Initializable {
 			if (sizeGn < 0)
 				throw new ExceptionWithMessage("Probability pT has to be greater than 0");
 
-			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, counterOfSteps, probabilityFactor);
+			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, counterOfSteps, probabilityFactor, oxygenConcentration);
 			depth = getDepth(model);
 
 			textDepth.setText(String.valueOf(depth));
@@ -283,6 +291,7 @@ public class Controller implements Initializable {
 		height = readIntFromTextField(fieldGridX);
 		width = readIntFromTextField(fieldGridY);
 		concentration = readDoubleFromTextField(fieldConcentration);
+		oxygenConcentration = readDoubleFromTextField(fieldConcentrationOxygen);
 		minSizeGrid = 1;
 		maxSizeGrid = 1000;
 		minSizeConcentration = 0.0;
@@ -294,7 +303,7 @@ public class Controller implements Initializable {
 
 		if (checkVarInRange(height, minSizeGrid, maxSizeGrid) && checkVarInRange(width, minSizeGrid, maxSizeGrid)) {
 			if (checkVarInRange(concentration, minSizeConcentration, maxSizeConcentration)) {
-				model.createAndInitializeGrid(height, width, concentration);
+				model.createAndInitializeGrid(height, width, concentration, oxygenConcentration);
 				buttonLoadBorders.setDisable(false);
 				buttonLoadBordersBMP.setDisable(false);
 				startButton.setDisable(false);

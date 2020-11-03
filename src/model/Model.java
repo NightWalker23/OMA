@@ -21,6 +21,7 @@ public class Model {
 	private List<MetalCell> listOfMetalCellsAO;
 	private List<OxygenCell> listOfAllOxygenCells;
 	private List<OxygenCell> listOfActiveOxygenCells;
+	private List<OxygenCell> listOfOxygenOnTop;
 
 	public MetalCell[][] getGridMetalCell() {
 		return gridMetalCell;
@@ -49,7 +50,7 @@ public class Model {
 	 * @param gridHeight    - height of array of metal cells
 	 * @param concentration - percentage of cells that will have State.A after initialization
 	 */
-	public void createAndInitializeGrid(int gridHeight, int gridWidth, double concentration) {
+	public void createAndInitializeGrid(int gridHeight, int gridWidth, double concentration, double oxygenConcentration) {
 		this.width = gridWidth;
 		this.height = gridHeight;
 
@@ -59,6 +60,7 @@ public class Model {
 		listOfMetalCellsAO = new ArrayList<>();
 		listOfAllOxygenCells = new ArrayList<>();
 		listOfActiveOxygenCells = new ArrayList<>();
+		listOfOxygenOnTop = new ArrayList<>();
 
 		//create a grid of oxygen cells and initialize it with empty state (false)
 		gridOxygen = new OxygenCell[height][width - 1];
@@ -67,10 +69,13 @@ public class Model {
 			for (int j = 0; j < width - 1; j++) {
 				gridOxygen[i][j] = new OxygenCell(i == 0, i, j);
 				if (i == 0) {
-					listOfActiveOxygenCells.add(gridOxygen[i][j]);
+//					listOfActiveOxygenCells.add(gridOxygen[i][j]);
+					listOfOxygenOnTop.add(gridOxygen[i][j]);
 				}
 			}
 		}
+
+		fillOxygenOnTop(oxygenConcentration);
 
 		//add all oxygen cells from gridOxygen array to listOfAllOxygenCells by reference
 		for (OxygenCell[] array : gridOxygen) {
@@ -108,11 +113,30 @@ public class Model {
 	}
 
 
+	private void fillOxygenOnTop(double oxygenConcentration){
+		int numberOfOxygenToBeActive = (int) (oxygenConcentration * this.width);
+
+		for (OxygenCell el : listOfOxygenOnTop) {
+			el.setActive(false);
+			listOfActiveOxygenCells.remove(el);
+		}
+
+		for (int i = 0; i < numberOfOxygenToBeActive; i++){
+			OxygenCell tmpCell;
+			tmpCell = listOfOxygenOnTop.get(ThreadLocalRandom.current().nextInt(0, listOfOxygenOnTop.size()));
+			tmpCell.setActive(true);
+			listOfActiveOxygenCells.add(tmpCell);
+		}
+	}
+
+
 	public void startSimulation(int minNeighboursSquare, double probabilityPT, double factorR,
 								double probabilityP0, double probabilityP2, double probabilityP,
 								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps,
-								Point counterOfSteps, double probabilityFactor) throws Exception {
+								Point counterOfSteps, double probabilityFactor, double oxygenConcentration) throws Exception {
 		if (isGridInitialized()) {
+			fillOxygenOnTop(oxygenConcentration);
+
 			for (int j = 0; j < steps; j++) {
 				for (int i = 0; i < iteratorS1; i++) {
 					oxygenDiffusion(gridOxygen, probabilityP0, probabilityP2, probabilityP, probabilityFactor);
