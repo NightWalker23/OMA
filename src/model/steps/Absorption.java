@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class Absorption {
+public abstract class Absorption {
 
 	public static void startAbsorption(MetalCell[][] gridMetalCell, int radiusN, int sizeGn, int heightMC, int widthMC,
 									   List<MetalCell> listOfMetalCellsA, List<MetalCell> listOfMetalCellsI) {

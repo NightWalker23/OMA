@@ -12,12 +12,9 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import model.MetalCell;
-import model.OxygenCell;
-import model.State;
+import model.*;
 import model.exceptions.ExceptionGrainBorder;
 import model.exceptions.ExceptionOxygenBottom;
-import model.Model;
 import model.exceptions.ExceptionOxygenDiffusion;
 import model.exceptions.ExceptionWithMessage;
 
@@ -61,18 +58,24 @@ public class Controller implements Initializable {
 	public Button buttonSaveImage;
 	public Button buttonLoadBordersBMP;
 	public TextField fieldConcentrationOxygen;
+	public Text textI;
+	public Text textA;
+	public Text textAO;
+	public Text textA_AO;
 	GraphicsContext gc;
 	Model model;
 	int cellSize, depth;
 	double oxygenConcentration;
-	Point counterOfSteps;
+//	Point counterOfSteps;
+	Info info;
 
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		cellSize = 1;
 		depth = 0;
-		counterOfSteps = new Point(0, 0);
+//		counterOfSteps = new Point(0, 0);
+		info = new Info(0, 0, 0, 0, 0);
 
 		ToggleGroup toggleGroup = new ToggleGroup();
 
@@ -113,6 +116,10 @@ public class Controller implements Initializable {
 
 		textDepth.setText("0");
 		textIterations.setText("0");
+		textI.setText("0");
+		textA.setText("0");
+		textAO.setText("0");
+		textA_AO.setText("0");
 
 		buttonSaveImage.setDisable(true);
 	}
@@ -159,11 +166,15 @@ public class Controller implements Initializable {
 			if (sizeGn < 0)
 				throw new ExceptionWithMessage("Probability pT has to be greater than 0");
 
-			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, counterOfSteps, probabilityFactor, oxygenConcentration);
+			model.startSimulation(minNeighbourSquare, pT, factorR, p0, p2, p, radiusN, sizeGn, iteratorS1, iteratorS2, steps, info, probabilityFactor, oxygenConcentration);
 			depth = getDepth(model);
 
 			textDepth.setText(String.valueOf(depth));
-			textIterations.setText(String.valueOf(counterOfSteps.x));
+			textIterations.setText(String.valueOf(info.steps));
+			textI.setText(String.valueOf(round(info.percentageI, 2)));
+			textA.setText(String.valueOf(round(info.percentageA, 2)));
+			textAO.setText(String.valueOf(round(info.percentageAO, 2)));
+			textA_AO.setText(String.valueOf(round(info.A_AO, 2)));
 		} catch (ExceptionOxygenBottom | ExceptionGrainBorder | ExceptionOxygenDiffusion | ExceptionWithMessage e) {
 			showMessage(e.getMessage(), Alert.AlertType.ERROR);
 		} catch (Exception e) {
@@ -174,6 +185,16 @@ public class Controller implements Initializable {
 		buttonLoadBorders.setDisable(true);
 		buttonLoadBordersBMP.setDisable(true);
 		buttonSaveImage.setDisable(false);
+	}
+
+
+	public static double round(double value, int places) {
+		if (places < 0) throw new IllegalArgumentException();
+
+		long factor = (long) Math.pow(10, places);
+		value = value * factor;
+		long tmp = Math.round(value);
+		return (double) tmp / factor;
 	}
 
 
@@ -299,7 +320,7 @@ public class Controller implements Initializable {
 
 		textDepth.setText("0");
 		textIterations.setText("0");
-		counterOfSteps.x = 0;
+		info.steps = 0;
 
 		if (checkVarInRange(height, minSizeGrid, maxSizeGrid) && checkVarInRange(width, minSizeGrid, maxSizeGrid)) {
 			if (checkVarInRange(concentration, minSizeConcentration, maxSizeConcentration)) {

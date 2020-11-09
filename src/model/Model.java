@@ -133,7 +133,7 @@ public class Model {
 	public void startSimulation(int minNeighboursSquare, double probabilityPT, double factorR,
 								double probabilityP0, double probabilityP2, double probabilityP,
 								int radiusN, int sizeGn, int iteratorS1, int iteratorS2, int steps,
-								Point counterOfSteps, double probabilityFactor, double oxygenConcentration) throws Exception {
+								Info info, double probabilityFactor, double oxygenConcentration) throws Exception {
 		if (isGridInitialized()) {
 			fillOxygenOnTop(oxygenConcentration);
 
@@ -147,7 +147,11 @@ public class Model {
 				for (int i = 0; i < iteratorS2; i++) {
 					absorption(gridMetalCell, gridOxygen, radiusN, sizeGn);
 				}
-				counterOfSteps.x++;
+				info.steps++;
+				info.percentageI = listOfMetalCellsI.size() * 100.0 / (width * height);
+				info.percentageA = listOfMetalCellsA.size() * 100.0 / (width * height);
+				info.percentageAO = listOfMetalCellsAO.size() * 100.0 / (width * height);
+				info.A_AO = listOfMetalCellsA.size() / listOfMetalCellsAO.size();
 			}
 		}
 	}
@@ -173,10 +177,6 @@ public class Model {
 	private void oxygenDiffusion(OxygenCell gridOxygen[][], double probabilityP0,
 								 double probabilityP2, double probabilityP, double probabilityFactor) throws Exception {
 		double threshold = 0.0001;
-
-//		if (!((probabilityP0 > probabilityP) && (probabilityP > probabilityP2))) {
-//			throw new ExceptionOxygenDiffusion("Probability P0 has to be greater than probability P and probability P has to be greater than probability P2");
-//		}
 
 		if (Math.abs((probabilityP0 + probabilityP + probabilityP2) - 1.0) > threshold) {
 			throw new ExceptionOxygenDiffusion("Sum of probabilities p0, p and p2 has to be equal 1.0!");
